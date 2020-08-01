@@ -45,6 +45,11 @@ cdrRouter.post('/getLogs',
     cdrController.getLogs
 )
 
+// Getting the number of calls for each month
+cdrRouter.get('/getStatistics',
+    cdrController.getStatistics
+)
+
 // // Getting the details for a particular record
 // cdrRouter.get('/getOrder', 
 //     customerController.getOrder

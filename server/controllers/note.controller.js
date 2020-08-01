@@ -3,12 +3,12 @@ const {Notes} = require("./../models/noteDetails")
 
 // Validates note
 let validateNote = async(req, res, next) => {
-    let required_fields = ["numbers", "note"]
+    let requiredFields = ["numbers", "note"]
     let note = req.body
-    for(let req_field of required_fields){
-        if(!note.hasOwnProperty(req_field)){
+    for(let reqField of requiredFields){
+        if(!note.hasOwnProperty(reqField)){
             return res.json({
-                message : "Didn't receive property " + req_field,
+                message : "Didn't receive property " + reqField,
                 code : 400
             })
         }

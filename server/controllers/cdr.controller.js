@@ -23,19 +23,20 @@ let validateRecord = async(req, res, next) => {
         }
 
         // Validating all required fields
-        let required_fields = ["callerNumber", "calledNumber", "startTime", "endTime", "callDuration", "callType", "imei", "imsi", "originLatLong", "destLatLong"]
+        let requiredFields = ["callerNumber", "calledNumber", "startTime", "endTime", "callDuration", "callType", "imei", "imsi", "originLatLong", "destLatLong"]
     
         // Checking whether fields exist
-        for(let req_field of required_fields){
-            if(!cdrRecord.hasOwnProperty(req_field)){
-                let error_msg = "Didn't receive the property " + req_field
+        for(let reqField of requiredFields){
+            if(!cdrRecord.hasOwnProperty(reqField)){
+                let errorMsg = "Didn't receive the property " + reqField
                 return res.json({
-                    message : error_msg,
+                    message : errorMsg,
                     code : 400
                 })
             }
         } 
         
+        cdrRecord.callDuration = isNaN(cdrRecord.callDuration) ? 0 : cdrRecord.callDuration
         req.locals.record = cdrRecord
         return next() 
     }catch(err){
@@ -73,10 +74,10 @@ let addRecord = async(req, res) => {
     let startTime = new Date(callerRecord.startTime)
     callerRecord.startTime = startTime
     let endTime = new Date(callerRecord.endTime)
+    
     callerRecord.endTime = endTime
-    CDR.findOneAndUpdate(callerRecord, callerRecord, {upsert: true}, function() {
+    await CDR.findOneAndUpdate(callerRecord, callerRecord, {upsert: true}, function() {})
 
-    })
     return res.json({
         message : "Record successfully added",
         code : 201
@@ -136,66 +137,132 @@ let getAdjacency = async(req, res) => {
         })
     }
 
-    let adj_list = {}
+    // Creating the adjacency list
+    let adjList = {}
 
-    for(let phoneNumber of phoneNumbers){
+    // Defining a defaut object in the adjacency list
+    let defaultAdjValue = {
+        duration : 0,
+        numCalls : 0,
+        numSMS : 0,
+        sameIMEI : false
+    } 
+
+    // Getting all the phone numbers who have the same IMEI and creating edges between these numbers 
+    let allNumbers = new Set()
+    for(let refNumber of phoneNumbers){
+        allNumbers.add(refNumber)
+        let refRecord = await CDR.findOne({callerNumber : refNumber})
+        
+        // If no call record exists for the number
+        if(!refRecord){
+            continue
+        }
+
+        // Reference IMEI
+        refImei = refRecord.imei
+
+        // Finding all records with refImei and adding all phone numbers
+        let sameImeiRecords = await CDR.find({imei : refImei})
+        for(let record of sameImeiRecords){
+            let secondNumber = record.callerNumber
+            if(secondNumber != refNumber && !allNumbers.has(secondNumber)){
+                // Adding an edge in the adj from refNumber to secondNumber
+                if(!adjList[refNumber]){
+                    adjList[refNumber] = {}
+                }
+                if(!adjList[refNumber][secondNumber]){
+                    adjList[refNumber][secondNumber] = Object.assign({}, defaultAdjValue)
+                    adjList[refNumber][secondNumber].sameIMEI = true
+                }
+                if(!adjList[secondNumber]){
+                    adjList[secondNumber] = {}
+                }
+                if(!adjList[secondNumber][refNumber]){
+                    adjList[secondNumber][refNumber] = Object.assign({}, defaultAdjValue)
+                    adjList[secondNumber][refNumber].sameIMEI = true
+                }
+                allNumbers.add(secondNumber)
+            }
+        }
+    }
+
+    // Converting all numbers to a list
+    allNumbers = Array.from(allNumbers)
+
+    for(let phoneNumber of allNumbers){
         let outgoing = await CDR.find({callerNumber : phoneNumber})
         let incoming = await CDR.find({calledNumber : phoneNumber})
 
         // Creating a map of contact to all other contacts
-        let adj_row = adj_list[phoneNumber]
-        if(!adj_row){
-           adj_row = {}
+        let adjRow = adjList[phoneNumber]
+        if(!adjRow){
+           adjRow = {}
         }
         
         // Outgoing calls
         for(let call of outgoing){
-            let called_number = call.calledNumber
-            let called_person = adj_row[called_number]
-            if(called_person){
-                adj_row[called_number] = {
-                    duration : called_person.duration + call.callDuration,
-                    numCalls : called_person.numCalls + 1
+            let calledNumber = call.calledNumber
+            let callType = call.callType
+            
+            if(callType === "CALL-OUT" || callType == "CALL-IN"){
+                if(adjRow[calledNumber]){
+                    adjRow[calledNumber].duration = adjRow[calledNumber].duration + call.callDuration
+                    adjRow[calledNumber].numCalls = adjRow[calledNumber].numCalls + 1 
+                }else{
+                    adjRow[calledNumber] = Object.assign({}, defaultAdjValue)
+                    adjRow[calledNumber].duration = call.callDuration
+                    adjRow[calledNumber].numCalls = 1
                 }
-            }else{
-                adj_row[called_number] = {
-                    duration : call.callDuration, 
-                    numCalls : 1
+            }else if(callType === "SMS-OUT" || callType === "SMS-IN"){
+                if(adjRow[calledNumber]){
+                    adjRow[calledNumber].numSMS = adjRow[calledNumber].numSMS + 1
+                }else{
+                    adjRow[calledNumber] = Object.assign({}, defaultAdjValue)
+                    adjRow[calledNumber].numSMS = 1
                 }
             }
         }
+
+        // Updating the adjacency list of phone number
+        adjList[phoneNumber] = adjRow
 
         // Incoming calls
         for(let call of incoming){
-            let caller_number = call.callerNumber
-            
+            let callerNumber = call.callerNumber
+            let callType = call.callType
+
             // These will anyway be added later
-            if(caller_number in phoneNumbers){
+            if(callerNumber in phoneNumbers){
                 continue;
             }
             
-            if(!adj_list[caller_number]){
-                adj_list[caller_number] = {}
+            if(!adjList[callerNumber]){
+                adjList[callerNumber] = {}
             }
 
-            if(adj_list[caller_number][phoneNumber]){
-                adj_list[caller_number][phoneNumber] = {
-                    duration : adj_list[caller_number][phoneNumber].duration + call.callDuration,
-                    numCalls : adj_list[caller_number][phoneNumber].numCalls + 1
+            if(callType == "CALL-IN" || callType == "CALL-OUT"){
+                if(adjList[callerNumber][phoneNumber]){
+                    adjList[callerNumber][phoneNumber].duration = adjList[callerNumber][phoneNumber].duration + call.callDuration
+                    adjList[callerNumber][phoneNumber].numCalls = adjList[callerNumber][phoneNumber].numCalls + 1
+                }else{
+                    adjList[callerNumber][phoneNumber] = Object.assign({}, defaultAdjValue)
+                    adjList[callerNumber][phoneNumber].duration = call.callDuration
+                    adjList[callerNumber][phoneNumber].numCalls = 1
                 }
-            }else{
-                adj_list[caller_number][phoneNumber] = {
-                    duration : call.callDuration,
-                    numCalls : 1
+            }else if(callType == "SMS-IN" || callType == "SMS-OUT"){
+                if(adjList[callerNumber][phoneNumber]){
+                    adjList[callerNumber][phoneNumber].numSMS = adjList[callerNumber][phoneNumber].numSMS + 1
+                }else{
+                    adjList[callerNumber][phoneNumber] = Object.assign({}, defaultAdjValue)
+                    adjList[callerNumber][phoneNumber].numSMS = 1
                 }
             }
         }
-
-        adj_list[phoneNumber] = adj_row
     }
 
     return res.json({
-        message : adj_list,
+        message : adjList,
         code : 200
     })
 }
@@ -240,6 +307,34 @@ let getLogs = async(req, res) => {
     })
 }
 
+// Returns a statistics required for the dashboard
+let getStatistics = async(req, res) => {
+    // Getting the current year
+    let currentDate = new Date(Date.now())
+    let currentYear = currentDate.getFullYear()
+
+    // Getting the number of records for each month
+    let allRecords = await CDR.find({})
+    let monthCounts = []
+    for(let i = 1; i <= 12; ++i){
+        monthCounts.push(0)
+    }
+
+    for(let record of allRecords){
+        let startTime = record.startTime
+        let month = startTime.getMonth()
+        let year = startTime.getFullYear()
+        if(year == currentYear){
+            monthCounts[month - 1] += 1
+        }
+    }
+
+    return res.json({
+        cdrCounts : monthCounts,
+        code : 200     
+    })
+}
+
 let getLatLong = async (req, res) => {
     location = req.body.data
     let options = {
@@ -276,5 +371,6 @@ module.exports = {
     getAdjacency : getAdjacency,
     getLogs : getLogs,
     getLocationsList: getLocationsList,
-    getLatLong: getLatLong
+    getLatLong: getLatLong,
+    getStatistics : getStatistics
 }
