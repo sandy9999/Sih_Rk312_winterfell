@@ -21,6 +21,12 @@ const callDataRecords = Schema({
     // Call Duration 
     callDuration : {type : Number, required : true},
     
+    //Cell ID where call was initiated
+    originCellID: {type: String, required: true, index: true},
+
+    //Cell ID where call was dropped
+    destCellID: {type: String, required: true, index: true},
+
     // Position where call was initiated
     originLatLong : {
         type : {
