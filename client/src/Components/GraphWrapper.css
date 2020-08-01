@@ -1,0 +1,5 @@
+/* style to make graph svg stretch to full screen width */
+#graph-graph-wrapper svg {
+    width: 100% !important;
+    height: 500px !important;
+}
