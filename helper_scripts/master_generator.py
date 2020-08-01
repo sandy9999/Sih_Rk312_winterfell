@@ -6,15 +6,15 @@ def gen_datetime(min_year=2020, max_year=datetime.now().year):
     # generate a datetime in format yyyy-mm-dd hh:mm:ss.000000
     start = datetime(min_year, 1, 1, 00, 00, 00)
     years = max_year - min_year + 1
-    end = start + timedelta(days=200 * years)
+    end = start + timedelta(days=200 * years)#200 to take into consideration only the last few months of the current year
     return start + (end - start) * random()
 
 def generate_ipdr_data(phoneNumber, imei, imsi, cellid_set):
-    privateIP = str(randint(0, 255)) + "." + str(randint(0, 255)) + "." + str(randint(0, 255))
+    privateIP = str(randint(0, 255)) + "." + str(randint(0, 255)) + "." + str(randint(0, 255)) + "." + str(randint(0, 255))
     privatePort = randint(0, 65535)
-    publicIP = str(randint(0, 255)) + "." + str(randint(0, 255)) + "." + str(randint(0, 255))
+    publicIP = str(randint(0, 255)) + "." + str(randint(0, 255)) + "." + str(randint(0, 255)) + "." + str(randint(0, 255))
     publicPort = randint(0, 65535)
-    destIP = str(randint(0, 255)) + "." + str(randint(0, 255)) + "." + str(randint(0, 255))
+    destIP = str(randint(0, 255)) + "." + str(randint(0, 255)) + "." + str(randint(0, 255)) + "." + str(randint(0, 255))
     destPort = randint(0, 65535)
     startTime = gen_datetime()
     duration = randint(60, 7200)
