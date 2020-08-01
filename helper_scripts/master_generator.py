@@ -6,7 +6,7 @@ def gen_datetime(min_year=2020, max_year=datetime.now().year):
     # generate a datetime in format yyyy-mm-dd hh:mm:ss.000000
     start = datetime(min_year, 1, 1, 00, 00, 00)
     years = max_year - min_year + 1
-    end = start + timedelta(days=365 * years)
+    end = start + timedelta(days=200 * years)
     return start + (end - start) * random()
 
 def generate_ipdr_data(phoneNumber, imei, imsi, cellid_set):
@@ -66,7 +66,8 @@ def generate_cellid_set():
     fieldnames = ("radio","mcc","net","area","cell","unit","lon","lat","range","samples","changeable","created","updated","averageSignal")
     reader = csv.DictReader( csvfile, fieldnames)
     for row in reader:
-        cellid_set.append({"cellID": row["mcc"]+row["net"]+"-"+row["area"]+"-"+row["cell"], "latitude": row["lat"], "longitude": row["lon"]})
+        if row["mcc"] == "404" and row["net"] == "40":
+            cellid_set.append({"cellID": row["mcc"]+row["net"]+"-"+row["area"]+"-"+row["cell"], "latitude": row["lat"], "longitude": row["lon"]})
     return cellid_set
 
 cellid_set = generate_cellid_set()
@@ -88,5 +89,16 @@ for i in range(1, 500):
     imsi = random_common_fields["imsi"]
     returnedDict = generate_cdr_data(phoneNumber, imei, imsi, cellid_set)
     cdrWriter.writerow(returnedDict)
+    returnedDict = generate_ipdr_data(phoneNumber, imei, imsi, cellid_set)
+    ipdrWriter.writerow(returnedDict)
+
+random_common_fields = common_fields_data[0]
+phoneNumber = random_common_fields["phoneNumber"]
+imei = random_common_fields["imei"]
+imsi = random_common_fields["imsi"]
+for i in range(10):
+    returnedDict = generate_cdr_data(phoneNumber, imei, imsi, cellid_set)
+    cdrWriter.writerow(returnedDict)
+for i in range(10):
     returnedDict = generate_ipdr_data(phoneNumber, imei, imsi, cellid_set)
     ipdrWriter.writerow(returnedDict)
