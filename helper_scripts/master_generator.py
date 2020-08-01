@@ -66,8 +66,12 @@ def generate_cellid_set():
     fieldnames = ("radio","mcc","net","area","cell","unit","lon","lat","range","samples","changeable","created","updated","averageSignal")
     reader = csv.DictReader( csvfile, fieldnames)
     for row in reader:
+<<<<<<< HEAD
         if row["mcc"] == "404" and row["net"] == "40":
             cellid_set.append({"cellID": row["mcc"]+row["net"]+"-"+row["area"]+"-"+row["cell"], "latitude": row["lat"], "longitude": row["lon"]})
+=======
+        cellid_set.append({"cellID": row["mcc"]+row["net"]+"-"+row["area"]+"-"+row["cell"], "latitude": row["lat"], "longitude": row["lon"]})
+>>>>>>> [fix] CDR, IPDR generator, schema
     return cellid_set
 
 cellid_set = generate_cellid_set()
