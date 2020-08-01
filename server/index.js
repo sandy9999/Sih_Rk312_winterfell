@@ -4,6 +4,7 @@ const bodyParser = require("body-parser")
 const app = express()
 const env = require("./utils/env")
 const {rootRouter} = require("./routes/rootRouter")
+const {ipdrRouter} = require("./routes/ipdrRouter")
 const {cdrRouter} = require("./routes/cdrRouter")
 const {noteRouter} = require("./routes/noteRouter")
 const {profileRouter} = require("./routes/profileRouter")
@@ -12,6 +13,7 @@ const multer = require('multer')
 const csv = require('csv-parser')
 const fs = require('fs')
 const {CDR} = require("./models/callDetails")
+const {IPDR} = require("./models/ipDetails")
 const {Profile} = require("./models/profileDetails.js")
 
 // Connecting to the database
@@ -77,7 +79,7 @@ app.post('/cdr/uploadCSV', function(req, res) {
 
 });
 
-app.post('/cdr/uploadProfileCSV', function(req, res) {
+app.post('/profile/uploadProfileCSV', function(req, res) {
     upload(req, res, function (err) {
            if (err instanceof multer.MulterError) {
                return res.status(500).json(err)
@@ -101,9 +103,42 @@ app.post('/cdr/uploadProfileCSV', function(req, res) {
 
 });
 
+app.post('/ipdr/uploadIPDRCSV', function(req, res) {
+    upload(req, res, function (err) {
+           if (err instanceof multer.MulterError) {
+               return res.status(500).json(err)
+           } else if (err) {
+               return res.status(500).json(err)
+           }
+    fs.createReadStream(req.file.path)
+    .pipe(csv())
+    .on('data', (row) => {
+        row.originLatLong = {"lat":row.originLat, "long":row.originLong};
+        delete row.originLat;
+        delete row.originLong;
+        
+        let startTime = new Date(row.startTime)
+        row.startTime = startTime
+        let endTime = new Date(row.endTime)
+        row.endTime = endTime
+        
+        data = row
+        IPDR.findOneAndUpdate(data, data, {upsert: true}, function() {
+
+        })
+
+    })
+    .on('end', () => {
+        console.log('CSV file successfully processed and records added');
+    });
+      return res.status(200).send(req.file)
+    })
+});
+
 // Connecting all routers
 app.use('/', rootRouter);
 app.use('/cdr', cdrRouter);
+app.use('/ipdr', ipdrRouter);
 app.use('/note', noteRouter);
 app.use('/profile', profileRouter);
 

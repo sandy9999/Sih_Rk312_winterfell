@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import Fab from '@material-ui/core/Fab'
 import AddIcon from '@material-ui/icons/Add'
-import './ProfileCsvUpload.css';
+import './IPDRCsvUpload.css';
 import axios from 'axios';
 const config = require('../../config')
 
-function submitProfileForm(contentType, data, setResponse) {
-    axios.post(`${config.BASE_URL}/profile/uploadProfileCSV`, data, {headers: {'content-type': contentType}})
+function submitIPDRForm(contentType, data, setResponse) {
+    axios.post(`${config.BASE_URL}/ipdr/uploadIPDRCSV`, data, {headers: {'content-type': contentType}})
     .then((response) => {
     setResponse(response.data);
     }).catch((error) => {
@@ -15,24 +15,24 @@ function submitProfileForm(contentType, data, setResponse) {
 }
 
 
-function ProfileCsvUpload() {
+function IPDRCsvUpload() {
   const [file, setFile] = useState(null);
 
-  function uploadProfileWithFormData() {
+  function uploadIPDRWithFormData() {
     const formData = new FormData();
     formData.append("file", file);
-    submitProfileForm("multipart/form-data", formData, (msg) => console.log(msg))
+    submitIPDRForm("multipart/form-data", formData, (msg) => console.log(msg))
   }
 
   return (
-    <div className="ProfileCsvUpload">
-        <p>Upload your Profile data in the form of a CSV file here</p>
+    <div className="IPDRCsvUpload">
+        <p>Upload your IPDR data in the form of a CSV file here</p>
 
-        <label htmlFor="upload-profile-data">
+        <label htmlFor="upload-ipdr-data">
         <input
             style={{ display: 'none' }}
-            id="upload-profile-data"
-            name="upload-profile-data"
+            id="upload-ipdr-data"
+            name="upload-ipdr-data"
             type="file"
             onChange={(e) => setFile(e.target.files[0])}
         />
@@ -43,16 +43,16 @@ function ProfileCsvUpload() {
             aria-label="add"
             variant="extended"
         >
-        <AddIcon /> Upload Profile CSV file
+        <AddIcon /> Upload IPDR CSV file
         </Fab>
         <br />
         <br />
         </label>
-        <Fab color="primary" size="small" component="span" aria-label="add" onClick={uploadProfileWithFormData}>
+        <Fab color="primary" size="small" component="span" aria-label="add" onClick={uploadIPDRWithFormData}>
         <AddIcon />
         </Fab>
     </div>
   );
 }
 
-export default ProfileCsvUpload;
+export default IPDRCsvUpload;

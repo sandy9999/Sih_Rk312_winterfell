@@ -8,11 +8,11 @@ ipdrRouter.get('/getAllIPDRRecords',
     ipdrController.getAllIPDRRecords
 )
 
-// A route to add cdr record registration
+// A route to add ipdr record registration
 ipdrRouter.post('/addIPDRRecord', 
     utils.initializeLocal,
-    ipdrController.validateRecord,
-    ipdrController.addRecord
+    ipdrController.validateIPDRRecord,
+    ipdrController.addIPDRRecord
 )
 
 // Getting a specific phone number's records

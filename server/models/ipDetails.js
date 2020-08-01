@@ -65,5 +65,5 @@ const ipDataRecords = Schema({
 });
 
 module.exports = {
-    CDR : Model('ipDataRecords', ipDataRecords)
+    IPDR : Model('ipDataRecords', ipDataRecords)
 }

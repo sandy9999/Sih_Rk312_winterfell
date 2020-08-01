@@ -14,11 +14,13 @@ def generate_data():
   aadharNumber = str(randint(10**(12-1), (10**12)-1))
   company = companies[randint(0, len(companies)-1)]
   remarks = "hello there"
-  return {"phoneNumber": phoneNumber, "name": name, "age": age, "email": email, "aadharNumber": aadharNumber, "company": company, "address": address, "remarks": remarks}
+  imei = str(randint(10**(15-1), (10**15)-1))
+  imsi = str(randint(10**(15-1), (10**15)-1))
+  return {"phoneNumber": phoneNumber, "name": name, "age": age, "email": email, "aadharNumber": aadharNumber, "company": company, "address": address, "remarks": remarks, "imei": imei, "imsi": imsi}
 
 
 with open('profileData.csv','w',newline='') as file:
-  fieldnames = ['phoneNumber', 'name', 'age', 'email', 'aadharNumber', 'company', 'address', 'remarks']
+  fieldnames = ['phoneNumber', 'name', 'age', 'email', 'aadharNumber', 'company', 'address', 'remarks', 'imei', 'imsi']
   writer = csv.DictWriter(file, fieldnames = fieldnames)
   writer.writeheader()
   for i in range(1, 10):
