@@ -41,6 +41,9 @@ const ipDataRecords = Schema({
 
     // Total Volume
     totalVolume : {type : Number, required : true},
+
+    //Cell ID where connection was initiated
+    originCellID: {type: String, required: true, index: true},
     
     // Position where call was initiated
     originLatLong : {
