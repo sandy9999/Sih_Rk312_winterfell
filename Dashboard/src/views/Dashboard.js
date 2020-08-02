@@ -29,17 +29,9 @@ import {
   CardHeader,
   CardBody,
   CardTitle,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem,
-  UncontrolledDropdown,
-  Label,
-  FormGroup,
-  Input,
   Table,
   Row,
   Col,
-  UncontrolledTooltip
 } from "reactstrap";
 
 // core components
@@ -191,16 +183,6 @@ class Dashboard extends React.Component {
       return (
         <tr key={key}>
           <td>
-            <FormGroup check>
-              <Label check>
-                <Input defaultValue="" type="checkbox" />
-                <span className="form-check-sign">
-                  <span className="check" />
-                </span>
-              </Label>
-            </FormGroup>
-          </td>
-          <td>
             <p className="title"> {note.title} </p>
             <p className="text-muted">
               {note.text}
@@ -340,10 +322,6 @@ class Dashboard extends React.Component {
                 </CardHeader>
                 <CardBody>
                   <div className="chart-area">
-                    {/* <Line
-                      data={chartExample2.data}
-                      options={chartExample2.options}
-                    /> */}
                     <Pie
                       data={pieExample.data}
                       options={pieExample.options}
@@ -395,38 +373,7 @@ class Dashboard extends React.Component {
               <Card className="card-tasks">
                 <CardHeader>
                   <h6 className="title d-inline">Notes({numNotes})</h6>
-                  <p className="card-category d-inline"> today</p>
-                  <UncontrolledDropdown>
-                    <DropdownToggle
-                      caret
-                      className="btn-icon"
-                      color="link"
-                      data-toggle="dropdown"
-                      type="button"
-                    >
-                      <i className="tim-icons icon-settings-gear-63" />
-                    </DropdownToggle>
-                    <DropdownMenu aria-labelledby="dropdownMenuLink" right>
-                      <DropdownItem
-                        href="#pablo"
-                        onClick={e => e.preventDefault()}
-                      >
-                        Action
-                      </DropdownItem>
-                      <DropdownItem
-                        href="#pablo"
-                        onClick={e => e.preventDefault()}
-                      >
-                        Another action
-                      </DropdownItem>
-                      <DropdownItem
-                        href="#pablo"
-                        onClick={e => e.preventDefault()}
-                      >
-                        Something else
-                      </DropdownItem>
-                    </DropdownMenu>
-                  </UncontrolledDropdown>
+                  <p className="card-category d-inline"> Latest</p>
                 </CardHeader>
                 <CardBody>
                   <div className="table-full-width table-responsive">

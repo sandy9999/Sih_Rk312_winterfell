@@ -19,7 +19,7 @@ import React from "react";
 // nodejs library that concatenates classes
 import classNames from "classnames";
 // react plugin used to create charts
-import { Line, Bar } from "react-chartjs-2";
+import { Line, Bar, Pie } from "react-chartjs-2";
 
 // reactstrap components
 import {
@@ -29,17 +29,13 @@ import {
   CardHeader,
   CardBody,
   CardTitle,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem,
-  UncontrolledDropdown,
-  Label,
+  CardFooter,
+  Form,
   FormGroup,
   Input,
   Table,
   Row,
   Col,
-  UncontrolledTooltip
 } from "reactstrap";
 
 // core components
@@ -48,56 +44,58 @@ import {
   chartExample2,
   chartExample3,
   chartExample4,
-  graphDataFormat
+  graphDataFormat,
+  pieExample,
+  pieTopCalls
 } from "variables/charts.js";
+
 
 class Profile extends React.Component {
   constructor(props) {
     super(props);
     let cdrCounts = []
     let ipdrCounts = []
+    let smsCounts = []
     for(let i = 1; i <= 12; ++i){
       cdrCounts.push(0)
       ipdrCounts.push(0)
+      smsCounts.push(0)
     }
-
+    
     this.state = {
       srcNumber: "9751893351",
       bigChartData: "data1",
       cdrCounts : cdrCounts,
       ipdrCounts : ipdrCounts,
+      smsCounts : smsCounts,
       notes : [],
-      cdrRecords : []
+      cdrRecords : [], 
+      ipdrRecords: [],
+      name: "",
+      associatedPhoneNumbers: [], 
+      imei :"",
+      associatedImeis: "",
+      imsi: "",
+      email: "",
+      aadharNumber: "",
+      remarks: "",
+      topCallLabels: ["hi", "bye"],
+      topCallFreqs: [2,3]
+    
     };
-
-        
-    // Getting the CDR Statistics
-    const data = {phoneNumber: this.state.srcNumber};
-    console.log(JSON.stringify(data));
-    fetch("http://localhost:8080/cdr/getSinglePhoneStatistics", {
-      method: "POST", 
-      body: JSON.stringify(data),
+    // Getting all the profile details for the number
+    fetch("http://localhost:8080/profile/getUserDetails/", {
+      method: "POST",
+      body: JSON.stringify({ number: this.state.srcNumber }),
       headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-      .then(response => response.json())
-      .then((data) => {
-        console.log("ajjsjs",data);
-        this.setState({
-          cdrCounts : data.cdrCounts
-        })
-      })
-      .catch((err) => console.log(err))
-
-    // TODO : Get IPDR Data and update counts
-
-    // Getting all the notes stored in the DB
-    fetch("http://localhost:8080/note/getAllNotes/")
+          'Content-Type': 'application/json'
+    }})
     .then(response => response.json())
       .then((data) => {
+        console.log("pofile",data);
+        // get notes of user
         let allNotes = []
-        for(let note of data.message){
+        for(let note of data.notes){
           let src = note.srcNumber
           let dest = note.destNumber
           let subNotes = note.notes
@@ -108,18 +106,9 @@ class Profile extends React.Component {
             })
           }
         }
-        this.setState({
-          notes : allNotes
-        })
-      })
-      .catch((err) => console.log(err))
-
-      // Getting all CDR records
-    fetch("http://localhost:8080/cdr/getAllRecords/")
-    .then(response => response.json())
-      .then((data) => {
+        // get cdr data of user
         let cdrData = []
-        for(let record of data){
+        for(let record of data.cdrRecords){
           cdrData.push({
             callerNumber : record.callerNumber,
             calledNumber : record.calledNumber,
@@ -128,13 +117,61 @@ class Profile extends React.Component {
           })
         }
 
+        // get ipdr data of user
+        let ipdrData = []
+        for(let record of data.ipdrRecords){
+          ipdrData.push({
+            sourceIP : record.publicIP,
+            sourcePort : record.publicPort,
+            destIP : record.destIP,
+            destPort : record.destPort,
+            totalVolume : record.totalVolume
+          })
+        }
+
+        // get pie chart labels, values for most frequent calls
+        let topCallFreqs = [];
+        let topCallLabels = [];
+        for(let caller of data.topCallers){
+          topCallLabels.push(caller.caller)
+          topCallFreqs.push(caller.numCalls)
+        }
+
         this.setState({
-          cdrRecords : cdrData
+          name: data.profileData.name,
+          associatedPhoneNumbers: data.profileData.associatedPhoneNumbers, 
+          imei :data.profileData.imei,
+          associatedImeis: data.profileData.associatedImeis,
+          imsi: data.profileData.imsi,
+          email: data.profileData.email,
+          aadharNumber: data.profileData.aadharNumber,
+          remarks: data.profileData.remarks,
+          notes : allNotes,
+          cdrRecords : cdrData,
+          ipdrRecords: ipdrData,
+          topCallLabels: topCallLabels,
+          topCallFreqs: topCallFreqs
         })
       })
       .catch((err) => console.log(err))
+    
+    // Getting the CDR Statistics
+    fetch("http://localhost:8080/cdr/getSinglePhoneStatistics", {
+      method: "POST", 
+      body: JSON.stringify({phoneNumber: this.state.srcNumber}),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then((data) => {
+      this.setState({
+        cdrCounts : data.cdrCounts
+      })
+    })
+    .catch((err) => console.log(err))
 
-  }
+  } 
 
   setBgChartData = name => {
     this.setState({
@@ -143,7 +180,6 @@ class Profile extends React.Component {
   };
   render() {
     let graphData = {}
-    
     // Getting the graph data
     if(this.state.bigChartData === "data1"){
       graphData = graphDataFormat
@@ -154,7 +190,13 @@ class Profile extends React.Component {
     }else if(this.state.bigChartData === "data3"){
       graphData = graphDataFormat
     }
-
+    let pieData = {}
+    // Getting the top callers pie data
+    pieData = pieTopCalls
+    console.log("pieeee",pieData)
+    pieData.labels = this.state.topCallLabels
+    pieData.datasets[0].data = this.state.topCallFreqs
+    
     // Getting all the note data
     let numNotes = this.state.notes.length
 
@@ -165,16 +207,6 @@ class Profile extends React.Component {
       key += 1
       return (
         <tr key={key}>
-          <td>
-            <FormGroup check>
-              <Label check>
-                <Input defaultValue="" type="checkbox" />
-                <span className="form-check-sign">
-                  <span className="check" />
-                </span>
-              </Label>
-            </FormGroup>
-          </td>
           <td>
             <p className="title"> {note.title} </p>
             <p className="text-muted">
@@ -187,9 +219,9 @@ class Profile extends React.Component {
 
     // Creating a note component for each note
     let noteComponents = notes.map(createNote)
-
+    
     // Creating all the CDR record component
-    let records = this.state.cdrRecords
+    let cdrRecords = this.state.cdrRecords;
     function createCDRRecord (record){
       key += 1
       return (
@@ -201,12 +233,144 @@ class Profile extends React.Component {
         </tr>
       )
     }
+    let callRecordComponents = cdrRecords.map(createCDRRecord)
     
-    let recordComponents = records.map(createCDRRecord)
+    // Creating all the IPDR record components
+    let ipdrRecords = this.state.ipdrRecords;
+    function createIPDRRecord (record){
+      key += 1
+      return (
+        <tr key={key}>
+          <td>{record.sourceIP}</td>
+          <td>{record.sourcePort}</td>
+          <td>{record.destIP}</td>
+          <td>{record.destPort}</td>
+          <td>{record.totalVolume}</td>
+        </tr>
+      )
+    }
+    let ipRecordComponents = ipdrRecords.map(createIPDRRecord)
 
+    function updateProfile (){
+      fetch("http://localhost:8080/profile/update", {
+      method: "POST", 
+      body: JSON.stringify({
+        srcNumber: this.state.srcNumber,
+        name: this.state.name,
+        email: this.state.email,
+        aadharNumber: this.state.aadharNumber,
+        remarks: this.state.remarks,
+      }),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then((data) => {
+      // todo add notification
+      console.log("Data saved successfully")
+    })
+    .catch((err) => console.log(err))
+    }
     return (
       <>
-        <div className="content">
+      <div className="content">
+        
+        {/* editable profile */}
+              <Card>
+                <CardHeader>
+                  <h5 className="title">Profile</h5>
+                </CardHeader>
+                <CardBody>
+                  <Form>
+                    <Row>
+                      <Col className="pr-md-1" md="4">
+                        <FormGroup>
+                          <label>Phone</label>
+                          <Input
+                            defaultValue={this.state.srcNumber}
+                            disabled
+                            type="text"
+                          />
+                        </FormGroup>
+                      </Col>
+                      <Col className="px-md-1" md="4">
+                        <FormGroup>
+                          <label>IMEI</label>
+                          <Input
+                            defaultValue={this.state.imei}
+                            disabled
+                            type="text"
+                          />
+                        </FormGroup>
+                      </Col>
+                      <Col className="pl-md-1" md="4">
+                        <FormGroup>
+                          <label>
+                            IMSI
+                          </label>
+                          <Input
+                            type="text"
+                            defaultValue={this.state.imsi}
+                            disabled
+                          />
+                        </FormGroup>
+                      </Col>
+                    </Row>
+                    <Row>
+                      <Col className="pr-md-1" md="4">
+                        <FormGroup>
+                          <label>Name</label>
+                          <Input
+                            type="text"
+                            defaultValue={this.state.name}
+                          />
+                        </FormGroup>
+                      </Col>
+                      <Col className="px-md-1" md="4">
+                        <FormGroup>
+                          <label htmlFor="exampleInputEmail">Email Address</label>
+                          <Input 
+                           type="email"
+                           defaultValue={this.state.email}
+                           placeholder="mike@email.com"
+                          />
+                        </FormGroup>
+                      </Col>
+                      <Col className="p1-md-1" md="4">
+                        <FormGroup>
+                          <label>Aadhar Number</label>
+                          <Input
+                            defaultValue={this.state.aadharNumber}
+                            type="text"
+                          />
+                        </FormGroup>
+                      </Col>
+                    </Row>
+                    <Row>
+                      <Col md="8">
+                        <FormGroup>
+                          <label>Remarks</label>
+                          <Input
+                            cols="80"
+                            defaultValue={this.state.remarks}
+                            placeholder="Here can be your description"
+                            rows="4"
+                            type="textarea"
+                          />
+                        </FormGroup>
+                      </Col>
+                    </Row>
+                  </Form>
+                </CardBody>
+                <CardFooter>
+                  <Button className="btn-fill" color="secondary" type="submit" onClick={updateProfile}>
+                    Save
+                  </Button>
+                </CardFooter>
+              </Card>
+
+        {/* stats about the profile */}
           <Row>
             <Col xs="12">
               <Card className="card-chart">
@@ -238,7 +402,7 @@ class Profile extends React.Component {
                             type="radio"
                           />
                           <span className="d-none d-sm-block d-md-block d-lg-block d-xl-block">
-                            CPDR
+                            CDR
                           </span>
                           <span className="d-block d-sm-none">
                             <i className="tim-icons icon-single-02" />
@@ -282,7 +446,7 @@ class Profile extends React.Component {
                             type="radio"
                           />
                           <span className="d-none d-sm-block d-md-block d-lg-block d-xl-block">
-                            Field 3
+                            SMS
                           </span>
                           <span className="d-block d-sm-none">
                             <i className="tim-icons icon-tap-02" />
@@ -315,9 +479,9 @@ class Profile extends React.Component {
                 </CardHeader>
                 <CardBody>
                   <div className="chart-area">
-                    <Line
-                      data={chartExample2.data}
-                      options={chartExample2.options}
+                  <Pie
+                      data={pieData}
+                      options={pieExample.options}
                     />
                   </div>
                 </CardBody>
@@ -343,62 +507,11 @@ class Profile extends React.Component {
               </Card>
             </Col>
             <Col lg="4">
-              <Card className="card-chart">
-                <CardHeader>
-                  <h5 className="card-category">Completed Tasks</h5>
-                  <CardTitle tag="h3">
-                    <i className="tim-icons icon-send text-success" /> 12,100K
-                  </CardTitle>
-                </CardHeader>
-                <CardBody>
-                  <div className="chart-area">
-                    <Line
-                      data={chartExample4.data}
-                      options={chartExample4.options}
-                    />
-                  </div>
-                </CardBody>
-              </Card>
-            </Col>
-          </Row>
-          <Row>
-            <Col lg="6" md="12">
-              <Card className="card-tasks">
+            <Card className="card-tasks">
                 <CardHeader>
                   <h6 className="title d-inline">Notes({numNotes})</h6>
-                  <p className="card-category d-inline"> today</p>
-                  <UncontrolledDropdown>
-                    <DropdownToggle
-                      caret
-                      className="btn-icon"
-                      color="link"
-                      data-toggle="dropdown"
-                      type="button"
-                    >
-                      <i className="tim-icons icon-settings-gear-63" />
-                    </DropdownToggle>
-                    <DropdownMenu aria-labelledby="dropdownMenuLink" right>
-                      <DropdownItem
-                        href="#pablo"
-                        onClick={e => e.preventDefault()}
-                      >
-                        Action
-                      </DropdownItem>
-                      <DropdownItem
-                        href="#pablo"
-                        onClick={e => e.preventDefault()}
-                      >
-                        Another action
-                      </DropdownItem>
-                      <DropdownItem
-                        href="#pablo"
-                        onClick={e => e.preventDefault()}
-                      >
-                        Something else
-                      </DropdownItem>
-                    </DropdownMenu>
-                  </UncontrolledDropdown>
-                </CardHeader>
+                  <p className="card-category d-inline"> Latest </p>
+                  </CardHeader>
                 <CardBody>
                   <div className="table-full-width table-responsive">
                     <Table>
@@ -407,6 +520,31 @@ class Profile extends React.Component {
                       </tbody>
                     </Table>
                   </div>
+                </CardBody>
+              </Card>
+            </Col>
+          </Row>
+          <Row>
+            <Col lg="6" md="12">
+            <Card>
+                <CardHeader>
+                  <CardTitle tag="h4">IPDR Data</CardTitle>
+                </CardHeader>
+                <CardBody>
+                  <Table className="tablesorter" responsive>
+                    <thead className="text-primary">
+                      <tr>
+                        <th>Source IP</th>
+                        <th>Source Port</th>
+                        <th>Destination IP</th>
+                        <th>Destination Port</th>
+                        <th>Total data volume</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {ipRecordComponents}
+                    </tbody>
+                  </Table>
                 </CardBody>
               </Card>
             </Col>
@@ -426,7 +564,7 @@ class Profile extends React.Component {
                       </tr>
                     </thead>
                     <tbody>
-                      {recordComponents}
+                      {callRecordComponents}
                     </tbody>
                   </Table>
                 </CardBody>
