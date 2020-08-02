@@ -330,7 +330,12 @@ let getLogs = async(req, res) => {
 
     // Sorting all logs in terms of starting time
     let compare = (a, b) => {
-        return (a.startTime <= b.startTime)
+        if(a.startTime < b.startTime){
+            return 1
+        }else if(a.startTime > b.startTime){
+            return -1
+        }
+        return 0
     }
     logs.sort(compare)
 
