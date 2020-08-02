@@ -19,7 +19,6 @@ import React, { useState, useContext } from "react";
 import { useHistory } from "react-router-dom";
 import ReactMapGL, { Marker, Popup } from "react-map-gl";
 
-import InputRange from "react-input-range";
 import { DateTime } from "react-datetime-bootstrap";
 
 // reactstrap components
