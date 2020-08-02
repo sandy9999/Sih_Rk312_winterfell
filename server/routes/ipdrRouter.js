@@ -35,6 +35,11 @@ ipdrRouter.post('/getIPDRLatLong',
     ipdrController.getIPDRLatLong
 )
 
+// Returns the month wise count of all IPDR records
+ipdrRouter.get('/getStatistics',
+	ipdrController.getStatistics
+)
+
 module.exports = {
     ipdrRouter : ipdrRouter
 }
