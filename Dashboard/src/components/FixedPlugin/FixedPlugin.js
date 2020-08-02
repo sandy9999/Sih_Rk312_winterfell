@@ -133,7 +133,6 @@ class FixedPlugin extends Component {
                             //check if it's a same IMEI link
                             
                             if (sameIMEI) {
-                              console.log("Asd");
                               graph.links.push({ "source": nodeA, "target": nodeB, color: "yellow", label: "same IMEI" });
                               // graph.links.push({"source": nodeB, "target": nodeA, color: "yellow"});
                               console.log("bye?", message[nodeB].nodeA);
@@ -141,7 +140,6 @@ class FixedPlugin extends Component {
                               console.log("bye bye", message[nodeB].nodeA);
                             }
                             else {
-                              console.log("Asd");
                               // alpha*duration + beta*numCalls = strength of relation
                               let alpha = 0.5;
                               let beta = 0.5;

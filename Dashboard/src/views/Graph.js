@@ -41,6 +41,12 @@ export default function Typography() {
   const [cardStatus, setCardStatus] = useState(0); //0 nothing 1 Profile 2 Logs
   const [details, setDetails] = useState();
 
+  const getGreenToRed = (percent) => {
+    const r = 255 * percent/100;
+    const g = 255 - (255 * percent/100);
+    return 'rgb('+r+','+g+',0)';
+  }
+
 
   //global context
   const { state: globalState, dispatch: globalStateDispatch } = useContext(
@@ -50,6 +56,46 @@ export default function Typography() {
   useEffect(() => {
     if (globalState.graph_nodes && globalState.graph_nodes.length !== 0)
       setNodes(globalState.graph_nodes);
+
+      axios.post(`${config.BASE_URL}/cdr/getAdjacency`, { "numbers": nodes })
+      .then(res => {
+        let message = res.data.message;
+        console.log(message);
+        // parse the response into graph form and set into state
+        let graph = { nodes: [], links: [] };
+        for (let nodeA in message) {
+          graph.nodes.push({ "id": nodeA });
+          for (let nodeB in message[nodeA]) {
+            // check if the nodeB is already there, else push
+            let duration = message[nodeA][nodeB].duration;
+            let numCalls = message[nodeA][nodeB].numCalls;
+            let sameIMEI = message[nodeA][nodeB].sameIMEI;
+            if (duration >= 0 && numCalls >= 0) {
+              let currentNode = graph.nodes.filter(o => o["id"] === nodeB)
+              if (currentNode.length === 0) {
+                graph.nodes.push({ "id": nodeB })
+              }
+              //check if it's a same IMEI link
+              
+              if (sameIMEI) {
+                graph.links.push({ "source": nodeA, "target": nodeB, color: "yellow", label: "same IMEI" });
+                // graph.links.push({"source": nodeB, "target": nodeA, color: "yellow"});
+                console.log("bye?", message[nodeB].nodeA);
+                delete message[nodeB].nodeA;
+                console.log("bye bye", message[nodeB].nodeA);
+              }
+              else {
+                // alpha*duration + beta*numCalls = strength of relation
+                let alpha = 0.5;
+                let beta = 0.5;
+                let percent = (alpha * (duration / 106) + beta * (numCalls / 2)) * 100;
+                graph.links.push({"source": nodeA, "target": nodeB, color: getGreenToRed(percent)});
+              }
+            }
+          }
+        }
+        setGraph(graph); setGraphReady(true);
+      })
   }, [])
 
   useEffect(() => {
