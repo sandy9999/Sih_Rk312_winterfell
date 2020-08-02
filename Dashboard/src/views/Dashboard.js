@@ -19,7 +19,7 @@ import React from "react";
 // nodejs library that concatenates classes
 import classNames from "classnames";
 // react plugin used to create charts
-import { Line, Bar } from "react-chartjs-2";
+import { Line, Bar, Pie } from "react-chartjs-2";
 
 // reactstrap components
 import {
@@ -48,25 +48,28 @@ import {
   chartExample2,
   chartExample3,
   chartExample4,
-  graphDataFormat
+  graphDataFormat,
+  pieExample
 } from "variables/charts.js";
 
 class Dashboard extends React.Component {
   constructor(props) {
     super(props);
     let cdrCounts = []
-    let ipdrCounts = []
+    let ipdrCounts = [11,21,31,41,15,6,1,0,0,0,0,0]
+    let smsCounts = [11,5,35,42,25,36,5,0,0,0,0,0]
     for(let i = 1; i <= 12; ++i){
       cdrCounts.push(0)
-      ipdrCounts.push(0)
+      // ipdrCounts.push(0)
     }
 
     this.state = {
       bigChartData: "data1",
       cdrCounts : cdrCounts,
       ipdrCounts : ipdrCounts,
+      smsCounts: smsCounts,
       notes : [],
-      cdrRecords : []
+      cdrRecords : [],
     };
 
         
@@ -143,6 +146,7 @@ class Dashboard extends React.Component {
       graphData.datasets[0].data = this.state.ipdrCounts
     }else if(this.state.bigChartData === "data3"){
       graphData = graphDataFormat
+      graphData.datasets[0].data = this.state.smsCounts
     }
 
     // Getting all the note data
@@ -228,7 +232,7 @@ class Dashboard extends React.Component {
                             type="radio"
                           />
                           <span className="d-none d-sm-block d-md-block d-lg-block d-xl-block">
-                            CPDR
+                            CALLS
                           </span>
                           <span className="d-block d-sm-none">
                             <i className="tim-icons icon-single-02" />
@@ -272,7 +276,7 @@ class Dashboard extends React.Component {
                             type="radio"
                           />
                           <span className="d-none d-sm-block d-md-block d-lg-block d-xl-block">
-                            Field 3
+                            SMS
                           </span>
                           <span className="d-block d-sm-none">
                             <i className="tim-icons icon-tap-02" />
@@ -297,17 +301,21 @@ class Dashboard extends React.Component {
             <Col lg="4">
               <Card className="card-chart">
                 <CardHeader>
-                  <h5 className="card-category">Total Shipments</h5>
+                  <h5 className="card-category">Applications used</h5>
                   <CardTitle tag="h3">
-                    <i className="tim-icons icon-bell-55 text-info" />{" "}
-                    763,215
+                    <i className="tim-icons icon-wifi text-info" />{" "}
+                    1630 hours
                   </CardTitle>
                 </CardHeader>
                 <CardBody>
                   <div className="chart-area">
-                    <Line
+                    {/* <Line
                       data={chartExample2.data}
                       options={chartExample2.options}
+                    /> */}
+                    <Pie
+                      data={pieExample.data}
+                      options={pieExample.options}
                     />
                   </div>
                 </CardBody>
@@ -316,10 +324,10 @@ class Dashboard extends React.Component {
             <Col lg="4">
               <Card className="card-chart">
                 <CardHeader>
-                  <h5 className="card-category">Daily Sales</h5>
+                  <h5 className="card-category">Maximum Call Durations</h5>
                   <CardTitle tag="h3">
-                    <i className="tim-icons icon-delivery-fast text-primary" />{" "}
-                    3,500€
+                    <i className="tim-icons icon-chat-33 text-primary" />{" "}
+                    343 mins
                   </CardTitle>
                 </CardHeader>
                 <CardBody>
@@ -335,16 +343,16 @@ class Dashboard extends React.Component {
             <Col lg="4">
               <Card className="card-chart">
                 <CardHeader>
-                  <h5 className="card-category">Completed Tasks</h5>
+                  <h5 className="card-category">People with criminal history</h5>
                   <CardTitle tag="h3">
-                    <i className="tim-icons icon-send text-success" /> 12,100K
+                    <i className="tim-icons icon-send text-success" /> 530 mins
                   </CardTitle>
                 </CardHeader>
                 <CardBody>
                   <div className="chart-area">
                     <Line
-                      data={chartExample4.data}
-                      options={chartExample4.options}
+                      data={chartExample2.data}
+                      options={chartExample2.options}
                     />
                   </div>
                 </CardBody>

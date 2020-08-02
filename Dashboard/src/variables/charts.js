@@ -224,10 +224,10 @@ let chartExample2 = {
     gradientStroke.addColorStop(0, "rgba(29,140,248,0)"); //blue colors
 
     return {
-      labels: ["JUL", "AUG", "SEP", "OCT", "NOV", "DEC"],
+      labels: ["JAN", "FEB", "MAR", "APR", "MAY", "JUN"],
       datasets: [
         {
-          label: "Data",
+          label: "Calls",
           fill: true,
           backgroundColor: gradientStroke,
           borderColor: "#1f8ef1",
@@ -263,10 +263,10 @@ let chartExample3 = {
     gradientStroke.addColorStop(0, "rgba(119,52,169,0)"); //purple colors
 
     return {
-      labels: ["USA", "GER", "AUS", "UK", "RO", "BR"],
+      labels: ["Ram", "Sandhya", "9874561230", "Hrishi", "9874563211"],
       datasets: [
         {
-          label: "Countries",
+          label: "Duration",
           fill: true,
           backgroundColor: gradientStroke,
           hoverBackgroundColor: gradientStroke,
@@ -274,7 +274,7 @@ let chartExample3 = {
           borderWidth: 2,
           borderDash: [],
           borderDashOffset: 0.0,
-          data: [53, 20, 10, 80, 100, 45]
+          data: [53, 20, 110, 80, 100]
         }
       ]
     };
@@ -451,11 +451,57 @@ let graphDataFormat = {
     }
   ]
 }
+let pieExample = {
+  data: canvas => {
+    let ctx = canvas.getContext("2d");
+
+    let gradientStroke = ctx.createLinearGradient(0, 230, 0, 50);
+
+    gradientStroke.addColorStop(1, "rgba(66,134,121,0.15)");
+    gradientStroke.addColorStop(0.4, "rgba(66,134,121,0.0)"); //green colors
+    gradientStroke.addColorStop(0, "rgba(66,134,121,0)"); //green colors
+
+    return {
+      labels: ["Whatsapp", "Facebook", "Web Browser", "Discord", "Telegram"],
+      datasets: [
+        {
+          label: "IPDR Top Apps",
+          fill: true,
+          backgroundColor: gradientStroke,
+          borderColor: "#00d6b4",
+          borderWidth: 2,
+          borderDash: [],
+          borderDashOffset: 0.0,
+          pointBackgroundColor: "#00d6b4",
+          pointBorderColor: "rgba(255,255,255,0)",
+          pointHoverBackgroundColor: "#00d6b4",
+          pointBorderWidth: 20,
+          pointHoverRadius: 4,
+          pointHoverBorderWidth: 15,
+          pointRadius: 4,
+          data: [40, 10, 15, 5, 30]
+        }
+      ]
+    }
+  },
+  options: {
+            // title:{
+            //   display:true,
+            //   text:'Average Rainfall per month',
+            //   fontSize:20
+            // },
+            legend:{
+              display:true,
+              position:'right'
+            }
+          }
+}
 
 module.exports = {
   chartExample1, // in src/views/Dashboard.js
   chartExample2, // in src/views/Dashboard.js
   chartExample3, // in src/views/Dashboard.js
   chartExample4, // in src/views/Dashboard.js,
-  graphDataFormat
+  graphDataFormat, // in src/views/Dashboard.js
+  pieExample, // in src/views/Dashboard.js
 };
