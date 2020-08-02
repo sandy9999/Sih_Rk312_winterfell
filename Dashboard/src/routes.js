@@ -16,6 +16,7 @@
 
 */
 import Dashboard from "views/Dashboard.js";
+import Profile from "views/Profile.js";
 import Icons from "views/Icons.js";
 import Map from "views/Map.js";
 import Notifications from "views/Notifications.js";
@@ -46,9 +47,15 @@ var routes = [
   {
     path: "/map",
     name: "Map",
-    rtlName: "خرائط",
     icon: "tim-icons icon-pin",
     component: Map,
+    layout: "/admin"
+  },
+  {
+    path: "/profile",
+    name: "Profile",
+    icon: "tim-icons icon-pin",
+    component: Profile,
     layout: "/admin"
   },
   {
