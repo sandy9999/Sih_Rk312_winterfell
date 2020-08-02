@@ -68,7 +68,6 @@ def generate_cellid_set():
     for row in reader:
         if row["mcc"] == "404" and row["net"] == "40":
             cellid_set.append({"cellID": row["mcc"]+row["net"]+"-"+row["area"]+"-"+row["cell"], "latitude": row["lat"], "longitude": row["lon"]})
-        cellid_set.append({"cellID": row["mcc"]+row["net"]+"-"+row["area"]+"-"+row["cell"], "latitude": row["lat"], "longitude": row["lon"]})
     return cellid_set
 
 cellid_set = generate_cellid_set()
