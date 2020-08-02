@@ -267,7 +267,8 @@ export default function GraphViewScreen() {
             className={classes.button}
             startIcon={<Refresh />}
             onClick = {() => {
-              axios.post(`${config.BASE_URL}/cdr/getAdjacency`, { "numbers": nodes})
+              console.log(nodes)
+              axios.post(`${config.BASE_URL}/cdr/getAdjacency`, { "numbers": ["1234567890"]})
               .then(res => {
                 let message = res.data.message;
                 console.log(message);

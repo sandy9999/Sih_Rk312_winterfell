@@ -9,3 +9,4 @@ client/.env*
 Dashboard/.env*
 Dashboard/node_modules
 Dashboard/package-lock.json
+Dashboard/node_modules/*
