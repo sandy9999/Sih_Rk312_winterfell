@@ -36,11 +36,16 @@ import {
   ListGroup,
   ListGroupItem,
   Button,
+  Dropdown,
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem,
 } from "reactstrap";
 
 import { store } from "../store";
 
 import userPin from "assets/img/userPinN.png";
+import { setGlobalCssModule } from "reactstrap/lib/utils";
 
 const Map = (props) => {
   const history = useHistory();
@@ -54,8 +59,10 @@ const Map = (props) => {
     height: "100%",
   });
 
-  //Loading
+  //Loading & others
   const [isLoading, setIsLoading] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mode, setMode] = useState("basic");
 
   // Location Search
   const [searchLocations, setSearchLocations] = useState([]);
@@ -69,6 +76,9 @@ const Map = (props) => {
   const [userMarkers, setUserMarkers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [targetList, setTargetList] = useState([]);
+
+  const [heatMapTargetList, setHeatMapTargetList] = useState([]);
+  const [currHeatMapTarget, setCurrHeatMapTarget] = useState("");
 
   //Context
   const { state: globalState, dispatch: globalStateDispatch } = useContext(
@@ -166,16 +176,42 @@ const Map = (props) => {
     setTargetList((list) => tempTargets);
   };
 
+  // Heatmap
+  const addToHeatMapList = (target) => {
+    if (heatMapTargetList.length >= 10) {
+      alert("Max 10 entries allowed in Heatmap");
+      return;
+    }
+    if (
+      heatMapTargetList.findIndex((e) => {
+        return e == target;
+      }) == -1
+    )
+      setHeatMapTargetList((list) => [...list, target]);
+  };
+
+  const deleteHeatMapTarget = (target) => {
+    const tempTargets = heatMapTargetList.filter((e) => e != target);
+    setHeatMapTargetList(tempTargets);
+  };
+
+  const handleHeatMapRender = () => {
+    alert("heatmap");
+  };
+
+  // Others
   const handleGoToGraph = (e) => {
     globalStateDispatch({ type: "SET_GRAPH_NODES", payload: targetList });
     history.push("/admin/graph");
   };
 
+  const toggle = () => setDropdownOpen((prevState) => !prevState);
+
   return (
     <>
       <div className="content" style={{ height: "80vh" }}>
         <Row>
-          <Col md="9">
+          <Col lg="10" md="9">
             <Card className="card-plain">
               <CardHeader>Map Visual</CardHeader>
               <CardBody style={{ height: "100%" }}>
@@ -282,7 +318,7 @@ const Map = (props) => {
               </CardBody>
             </Card>
           </Col>
-          <Col md="3">
+          <Col lg="2" md="3">
             <Card className="card-plain">
               <CardHeader style={{ minHeight: "50px" }}>
                 <Row>
@@ -303,122 +339,246 @@ const Map = (props) => {
                     </Col>
                   ) : null}
                 </Row>
+                <Row>
+                  <Dropdown
+                    isOpen={dropdownOpen}
+                    toggle={toggle}
+                    style={{ width: "100%" }}
+                  >
+                    <DropdownToggle style={{ width: "100%" }} caret>
+                      {mode.toUpperCase()}
+                    </DropdownToggle>
+                    <DropdownMenu>
+                      <DropdownItem onClick={(e) => setMode("basic")}>
+                        Basic
+                      </DropdownItem>
+                      <DropdownItem onClick={(e) => setMode("heatmap")}>
+                        Heatmap
+                      </DropdownItem>
+                    </DropdownMenu>
+                  </Dropdown>
+                </Row>
               </CardHeader>
-              <CardBody style={{ background: "#212529", borderRadius: "10px" }}>
-                <Form>
-                  <FormGroup>
-                    <Input
-                      style={{ color: "white" }}
-                      plaintext
-                      placeholder="Search for locations"
-                      onChange={(e) => handleLocationSearch(e.target.value)}
-                    />
-                  </FormGroup>
-                  {searchLocations.length > 0 ? (
-                    <ListGroup style={{ cursor: "pointer" }}>
-                      {searchLocations.map((ele, idx) => {
-                        return (
-                          <ListGroupItem
-                            color="light"
-                            action
-                            key={idx}
-                            onClick={(e) => {
-                              handleSearchLocationSet(ele);
-                            }}
-                          >
-                            {ele}
-                          </ListGroupItem>
-                        );
-                      })}
-                    </ListGroup>
-                  ) : null}
-                </Form>
-              </CardBody>
-              <CardBody
-                style={{
-                  background: "#212529",
-                  borderRadius: "10px",
-                  marginTop: "20px",
-                  color: "white",
-                }}
-              >
-                <Form>
-                  <FormGroup>
-                    <Input
-                      style={{ color: "white" }}
-                      type="number"
-                      value={areaRadius}
-                      placeholder="Radius in kms (1-50)"
-                      onBlur={(e) => {
-                        if (e.target.value == "" || e.target.value < 1)
-                          e.target.value = 1;
-                        if (e.target.value > 50) e.target.value = 50;
-                        setAreaRadius(parseInt(e.target.value));
-                      }}
-                      onChange={(e) => {
-                        setAreaRadius(parseInt(e.target.value));
-                      }}
-                    />
-                  </FormGroup>
-                  <FormGroup>
-                    <Input
-                      style={{ color: "white" }}
-                      type="number"
-                      min={0}
-                      value={timeOffset}
-                      onChange={(e) => setTimeOffset(parseInt(e.target.value))}
-                      placeholder="Time offset in mins"
-                      // onChange={(e) => handleLocationSearch(e.target.value)}
-                    />
-                  </FormGroup>
-                </Form>
-                <DateTime
-                  value={selectedDate}
-                  onChange={(date) => setSelectedDate(date)}
-                />
-                <Button
-                  color="primary"
-                  style={{ margin: "10px auto", display: "block" }}
-                  onClick={handleUsersQuery}
-                >
-                  Submit Query
-                </Button>
-              </CardBody>
-              <CardBody
-                style={{
-                  background: "#212529",
-                  borderRadius: "10px",
-                  marginTop: "20px",
-                  color: "white",
-                }}
-              >
-                Target List
-                {targetList.length ? (
-                  <ListGroup style={{ marginTop: "15px", cursor: "pointer" }}>
-                    {targetList.map((ele, idx) => {
-                      return (
-                        <ListGroupItem
-                          color="light"
-                          action
-                          key={idx}
-                          onClick={(e) => {
-                            handleTargetUserDelete(ele);
+              {mode == "basic" ? (
+                <>
+                  <CardBody
+                    style={{ background: "#212529", borderRadius: "10px" }}
+                  >
+                    <Form>
+                      <FormGroup>
+                        <Input
+                          style={{ color: "white" }}
+                          plaintext
+                          placeholder="Search for locations"
+                          onChange={(e) => handleLocationSearch(e.target.value)}
+                        />
+                      </FormGroup>
+                      {searchLocations.length > 0 ? (
+                        <ListGroup style={{ cursor: "pointer" }}>
+                          {searchLocations.map((ele, idx) => {
+                            return (
+                              <ListGroupItem
+                                color="light"
+                                action
+                                key={idx}
+                                onClick={(e) => {
+                                  handleSearchLocationSet(ele);
+                                }}
+                              >
+                                {ele}
+                              </ListGroupItem>
+                            );
+                          })}
+                        </ListGroup>
+                      ) : null}
+                    </Form>
+                  </CardBody>
+                  <CardBody
+                    style={{
+                      background: "#212529",
+                      borderRadius: "10px",
+                      marginTop: "20px",
+                      color: "white",
+                    }}
+                  >
+                    <Form>
+                      <FormGroup>
+                        <Label>Radius in kms (1-50)</Label>
+                        <Input
+                          style={{ color: "white" }}
+                          type="number"
+                          value={areaRadius}
+                          placeholder="Radius in kms (1-50)"
+                          onBlur={(e) => {
+                            if (e.target.value == "" || e.target.value < 1)
+                              e.target.value = 1;
+                            if (e.target.value > 50) e.target.value = 50;
+                            setAreaRadius(parseInt(e.target.value));
                           }}
+                          onChange={(e) => {
+                            setAreaRadius(parseInt(e.target.value));
+                          }}
+                        />
+                      </FormGroup>
+                      <FormGroup>
+                        <Label>Time Offset</Label>
+                        <Input
+                          style={{ color: "white" }}
+                          type="number"
+                          min={0}
+                          value={timeOffset}
+                          onChange={(e) =>
+                            setTimeOffset(parseInt(e.target.value))
+                          }
+                          placeholder="Time offset in mins"
+                          // onChange={(e) => handleLocationSearch(e.target.value)}
+                        />
+                      </FormGroup>
+                    </Form>
+                    <Label>Date & Time</Label>
+                    <DateTime
+                      value={selectedDate}
+                      onChange={(date) => setSelectedDate(date)}
+                    />
+                    <Button
+                      color="primary"
+                      style={{
+                        margin: "10px auto",
+                        display: "block",
+                        width: "100%",
+                      }}
+                      onClick={handleUsersQuery}
+                    >
+                      Submit Query
+                    </Button>
+                  </CardBody>
+                  <CardBody
+                    style={{
+                      background: "#212529",
+                      borderRadius: "10px",
+                      marginTop: "20px",
+                      color: "white",
+                    }}
+                  >
+                    Target List
+                    {targetList.length ? (
+                      <ListGroup
+                        style={{ marginTop: "15px", cursor: "pointer" }}
+                      >
+                        {targetList.map((ele, idx) => {
+                          return (
+                            <ListGroupItem
+                              color="light"
+                              action
+                              key={idx}
+                              onClick={(e) => {
+                                handleTargetUserDelete(ele);
+                              }}
+                            >
+                              {ele}
+                            </ListGroupItem>
+                          );
+                        })}
+                      </ListGroup>
+                    ) : null}
+                    <Button
+                      color="primary"
+                      style={{
+                        margin: "10px auto",
+                        display: "block",
+                        width: "100%",
+                      }}
+                      onClick={handleGoToGraph}
+                    >
+                      Go To Graph
+                    </Button>
+                  </CardBody>
+                </>
+              ) : mode == "heatmap" ? (
+                <>
+                  <CardBody
+                    style={{ background: "#212529", borderRadius: "10px" }}
+                  >
+                    <Form>
+                      <FormGroup>
+                        <Label>Start Time</Label>
+                        <DateTime
+                          value={selectedDate}
+                          onChange={(date) => setSelectedDate(date)}
+                        />
+                        <Label>End Time</Label>
+                        <DateTime
+                          value={selectedDate}
+                          onChange={(date) => setSelectedDate(date)}
+                        />
+                      </FormGroup>
+                    </Form>
+                  </CardBody>
+                  <CardBody
+                    style={{
+                      background: "#212529",
+                      borderRadius: "10px",
+                      marginTop: "15px",
+                    }}
+                  >
+                    <Form>
+                      <FormGroup>
+                        <Label>Target List - max 10</Label>
+                        <Input
+                          style={{ color: "white" }}
+                          type="number"
+                          onBlur={(e) => setCurrHeatMapTarget(e.target.value)}
+                          placeholder="Enter target number"
+                        />
+                        <Button
+                          color="primary"
+                          style={{
+                            margin: "10px auto",
+                            display: "block",
+                            width: "100%",
+                          }}
+                          onClick={(e) => addToHeatMapList(currHeatMapTarget)}
                         >
-                          {ele}
-                        </ListGroupItem>
-                      );
-                    })}
-                  </ListGroup>
-                ) : null}
-                <Button
-                  color="primary"
-                  style={{ margin: "10px auto", display: "block" }}
-                  onClick={handleGoToGraph}
-                >
-                  Go To Graph
-                </Button>
-              </CardBody>
+                          Add
+                        </Button>
+                      </FormGroup>
+                    </Form>
+                    {heatMapTargetList.length ? (
+                      <ListGroup
+                        style={{ marginTop: "15px", cursor: "pointer" }}
+                      >
+                        {heatMapTargetList.map((ele, idx) => {
+                          return (
+                            <ListGroupItem
+                              color="light"
+                              action
+                              key={idx}
+                              onClick={(e) => {
+                                deleteHeatMapTarget(ele);
+                              }}
+                            >
+                              {ele}
+                            </ListGroupItem>
+                          );
+                        })}
+                      </ListGroup>
+                    ) : null}
+                    <Button
+                      color="primary"
+                      style={{
+                        margin: "10px auto",
+                        display: "block",
+                        width: "100%",
+                      }}
+                      onClick={handleHeatMapRender}
+                    >
+                      Render Heatmap
+                    </Button>
+                  </CardBody>
+                </>
+              ) : (
+                <p>Invalid Mode</p>
+              )}
             </Card>
           </Col>
         </Row>
