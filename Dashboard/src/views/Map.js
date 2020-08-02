@@ -44,8 +44,22 @@ import {
 
 import { store } from "../store";
 
-import userPin from "assets/img/userPinN.png";
+import userPin0 from "assets/img/userPin0.png";
+import userPin1 from "assets/img/userPin0.png";
+import userPin2 from "assets/img/userPin0.png";
+import userPin3 from "assets/img/userPin0.png";
+import userPin4 from "assets/img/userPin0.png";
+import userPin5 from "assets/img/userPin0.png";
 import { setGlobalCssModule } from "reactstrap/lib/utils";
+
+const userPinArray = [
+  userPin0,
+  userPin1,
+  userPin2,
+  userPin3,
+  userPin4,
+  userPin5,
+];
 
 const Map = (props) => {
   const history = useHistory();
@@ -77,8 +91,15 @@ const Map = (props) => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [targetList, setTargetList] = useState([]);
 
-  const [heatMapTargetList, setHeatMapTargetList] = useState([]);
   const [currHeatMapTarget, setCurrHeatMapTarget] = useState("");
+  const [heatMapStartTime, setHeatMapStartTime] = useState(
+    new Date("1971-01-01T00:00:00.000Z").toISOString()
+  );
+  const [heatMapEndTime, setHeatMapEndTime] = useState(
+    new Date("2021-08-02T12:15:13.000Z").toISOString()
+  );
+  const [heatMapTargetList, setHeatMapTargetList] = useState([]);
+  const [heatMapMarkers, setHeatMapMarkers] = useState({});
 
   //Context
   const { state: globalState, dispatch: globalStateDispatch } = useContext(
@@ -195,8 +216,25 @@ const Map = (props) => {
     setHeatMapTargetList(tempTargets);
   };
 
-  const handleHeatMapRender = () => {
-    alert("heatmap");
+  const handleHeatMapRender = async () => {
+    setIsLoading(true);
+    const payload = {
+      startTime: heatMapStartTime,
+      endTime: heatMapEndTime,
+      numbers: heatMapTargetList,
+    };
+
+    const res = await fetch(`http://localhost:8080/cdr/getHeatMapLocations`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const usersData = await res.json();
+    await setHeatMapMarkers((obj) => usersData["heatmaps"]);
+    setIsLoading(false);
   };
 
   // Others
@@ -254,7 +292,7 @@ const Map = (props) => {
                         />
                       </button>
                     </Marker>
-
+                    {/* Basic mode markers */}
                     {userMarkers.length
                       ? userMarkers.map((ele, idx) => (
                           <Marker
@@ -274,7 +312,11 @@ const Map = (props) => {
                               }}
                               onClick={(e) => setSelectedUser(ele)}
                             >
-                              <img src={userPin} height="40px" width="40px" />
+                              <img
+                                src={userPinArray[0]}
+                                height="40px"
+                                width="40px"
+                              />
                             </button>
                           </Marker>
                         ))
@@ -291,12 +333,6 @@ const Map = (props) => {
                         <pre style={{ color: "black" }}>
                           {JSON.stringify(selectedUser, null, 2)}
                         </pre>
-                        {console.log(
-                          targetList.findIndex((ele) => {
-                            return ele == selectedUser["callerNumber"];
-                          }) != -1,
-                          "Ooj"
-                        )}
                         <Button
                           variant="contained"
                           color="primary"
@@ -313,6 +349,46 @@ const Map = (props) => {
                         </Button>
                       </Popup>
                     )}
+                    {/* HeatMap markers */}
+                    {Object.keys(heatMapMarkers).length &&
+                      Object.keys(heatMapMarkers).map((ele, idx) => {
+                        return (
+                          <>
+                            {heatMapMarkers[ele].map((item, index) => {
+                              const tempItem = {
+                                timestamp: item.timestamp,
+                                destLatLong: item.location,
+                              };
+                              return (
+                                <Marker
+                                  latitude={parseFloat(item.location.lat)}
+                                  longitude={parseFloat(item.location.long)}
+                                  offsetLeft={0}
+                                  offsetTop={0}
+                                  anchor="bottom"
+                                  key={index}
+                                >
+                                  <button
+                                    style={{
+                                      background: "none",
+                                      border: "none",
+                                      outline: "none",
+                                      cursor: "pointer",
+                                    }}
+                                    onClick={(e) => setSelectedUser(tempItem)}
+                                  >
+                                    <img
+                                      src={userPinArray[idx]}
+                                      height="40px"
+                                      width="40px"
+                                    />
+                                  </button>
+                                </Marker>
+                              );
+                            })}
+                          </>
+                        );
+                      })}
                   </ReactMapGL>
                 </div>
               </CardBody>
@@ -503,13 +579,13 @@ const Map = (props) => {
                       <FormGroup>
                         <Label>Start Time</Label>
                         <DateTime
-                          value={selectedDate}
-                          onChange={(date) => setSelectedDate(date)}
+                          value={heatMapStartTime}
+                          onChange={(date) => setHeatMapStartTime(date)}
                         />
                         <Label>End Time</Label>
                         <DateTime
-                          value={selectedDate}
-                          onChange={(date) => setSelectedDate(date)}
+                          value={heatMapEndTime}
+                          onChange={(date) => setHeatMapEndTime(date)}
                         />
                       </FormGroup>
                     </Form>
