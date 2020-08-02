@@ -86,24 +86,19 @@ let addRecord = async(req, res) => {
 
 // Returns cdr locations of each person using CDR records
 let getHeatmapLocations = async(req, res) => {
-    let refTime = new Date(req.body.refTime)
-    let duration   = req.body.duration
+    let startTimeReq = req.body.startTime
+    let endTimeReq   = req.body.endTime
     let phoneNumbers = req.body.numbers
     
-    if(!refTime || !duration || !phoneNumbers){
+    if(!startTimeReq || !endTimeReq || !phoneNumbers){
         return res.json({
-            message : "Missing atleast one of the required fields : refTime, duration, numbers",
+            message : "Missing atleast one of the required fields : startTime, endTime, numbers",
             code : 404
         })
     }        
 
-    // Getting start and end time
-    let startTimeReq = new Date(refTime.getTime())
-    let endTimeReq = new Date(refTime.getTime())
-    
-    // Setting startTime as refTime - duration and endTime as refTime + duration
-    startTimeReq.setMinutes(refTime.getMinutes() - duration)
-    endTimeReq.setMinutes(refTime.getMinutes() + duration)
+    startTimeReq = new Date(startTimeReq)
+    endTimeReq = new Date(endTimeReq)
 
     // Getting all locations of users with given phone numbers
     let heatmaps = {}
