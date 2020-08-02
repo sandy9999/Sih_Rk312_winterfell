@@ -79,7 +79,7 @@ app.post('/cdr/uploadCSV', function(req, res) {
 
 });
 
-app.post('/profile/uploadProfileCSV', function(req, res) {
+app.post('/profile/uploadCSV', function(req, res) {
     upload(req, res, function (err) {
            if (err instanceof multer.MulterError) {
                return res.status(500).json(err)
@@ -103,7 +103,7 @@ app.post('/profile/uploadProfileCSV', function(req, res) {
 
 });
 
-app.post('/ipdr/uploadIPDRCSV', function(req, res) {
+app.post('/ipdr/uploadCSV', function(req, res) {
     upload(req, res, function (err) {
            if (err instanceof multer.MulterError) {
                return res.status(500).json(err)

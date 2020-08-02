@@ -158,7 +158,7 @@ export default function Typography() {
             })
           }
           {
-            (details && details[1]) && details[1][0]["notes"].map((notesItem, index) => {
+            (details && details[1][0]) && details[1][0]["notes"].map((notesItem, index) => {
               return (
                 <Row>
                   <Col xs={6}>Details:</Col>

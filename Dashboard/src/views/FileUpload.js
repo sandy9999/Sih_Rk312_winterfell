@@ -16,10 +16,7 @@
 
 */
 import React from "react";
-import CsvUpload from './CsvUpload/CsvUpload'
-import ProfileCsvUpload from './ProfileCsvUpload/ProfileCsvUpload'
-import IPDRCsvUpload from './IPDRCsvUpload/IPDRCsvUpload'
-
+import FileUpload from "../components/FileUpload/FileUpload"
 // reactstrap components
 import {
   Card,
@@ -43,9 +40,9 @@ class Tables extends React.Component {
                   <CardTitle tag="h4">Data Upload</CardTitle>
                 </CardHeader>
                 <CardBody>
-                  <CsvUpload/>
-                  <IPDRCsvUpload/>
-                  <ProfileCsvUpload/>
+                  <FileUpload name="CDR" apiEndPoint="/cdr/uploadCSV" />
+                  <FileUpload name="IPDR" apiEndPoint="/ipdr/uploadCSV" />
+                  <FileUpload name="Profile" apiEndPoint="/profile/uploadCSV" />
                 </CardBody>
               </Card>
             </Col>
