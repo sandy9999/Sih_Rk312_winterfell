@@ -10,6 +10,35 @@ let getAllIPDRRecords = async (req, res) => {
     return res.json(records);
 }
 
+// Returns the number of IPDR records each month
+let getStatistics = async(req, res) => {
+    // Getting the current year
+    let currentDate = new Date(Date.now())
+    let currentYear = currentDate.getFullYear()
+
+    // Getting the number of records for each month
+    let allRecords = await IPDR.find({})
+    let monthCounts = []
+    for(let i = 1; i <= 12; ++i){
+        monthCounts.push(0)
+    }
+
+    for(let record of allRecords){
+        let startTime = record.startTime
+        let month = startTime.getMonth()
+        let year = startTime.getFullYear()
+        if(year == currentYear){
+            monthCounts[month - 1] += 1
+        }
+    }
+
+    return res.json({
+        ipdrCounts : monthCounts,
+        code : 200     
+    })
+}
+
+
 // Checks if the call data record is valid 
 let validateIPDRRecord = async(req, res, next) => {
     let ipdrRecord = req.body
@@ -160,5 +189,6 @@ module.exports = {
     addIPDRRecord : addIPDRRecord,
     getIPDRRecords : getIPDRRecords,
     getIPDRLocationsList: getIPDRLocationsList,
-    getIPDRLatLong: getIPDRLatLong
+    getIPDRLatLong: getIPDRLatLong,
+    getStatistics : getStatistics
 }

@@ -315,22 +315,53 @@ let getStatistics = async(req, res) => {
 
     // Getting the number of records for each month
     let allRecords = await CDR.find({})
-    let monthCounts = []
+    let callCounts = []
+    let smsCounts = []
+    let callDurations = {}
     for(let i = 1; i <= 12; ++i){
-        monthCounts.push(0)
+        callCounts.push(0)
+        smsCounts.push(0)
     }
 
     for(let record of allRecords){
         let startTime = record.startTime
         let month = startTime.getMonth()
         let year = startTime.getFullYear()
+        let callType = record.callType
+        let callerNumber = record.callerNumber
+        let callDuration = record.callDuration
+
+        // Aggregating call duration for each user
+        if(!callDurations[callerNumber]){
+            callDurations[callerNumber] = 0
+        }
+        callDurations[callerNumber] += callDuration
+
         if(year == currentYear){
-            monthCounts[month - 1] += 1
+            if(callType == "CALL-IN" || callType == "CALL-OUT"){
+                callCounts[month - 1] += 1
+            }else if(callType == "SMS-IN" || callType == "SMS-OUT"){
+                smsCounts[month - 1] += 1
+            }
         }
     }
 
+    // Mapping callDurations to a list so that it can be sorted 
+    let callDurationList = []
+    for(let caller in callDurations){
+        callDurationList.push({
+            caller : caller,
+            duration : callDurations[caller]
+        })
+    }
+
+    // Sorting callers on the basis of duration
+    callDurationList.sort((a, b) => a.duration < b.duration)
+
     return res.json({
-        cdrCounts : monthCounts,
+        cdrCounts : callCounts,
+        smsCounts : smsCounts,
+        highestCallers : callDurationList.slice(0, 5),
         code : 200     
     })
 }
