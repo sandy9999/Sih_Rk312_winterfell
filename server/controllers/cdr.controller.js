@@ -84,6 +84,47 @@ let addRecord = async(req, res) => {
     });
 }
 
+// Returns cdr locations of each person using CDR records
+let getHeatmapLocations = async(req, res) => {
+    let refTime = new Date(req.body.refTime)
+    let duration   = req.body.duration
+    let phoneNumbers = req.body.numbers
+    
+    if(!refTime || !duration || !phoneNumbers){
+        return res.json({
+            message : "Missing atleast one of the required fields : refTime, duration, numbers",
+            code : 404
+        })
+    }        
+
+    // Getting start and end time
+    let startTimeReq = new Date(refTime.getTime())
+    let endTimeReq = new Date(refTime.getTime())
+    
+    // Setting startTime as refTime - duration and endTime as refTime + duration
+    startTimeReq.setMinutes(refTime.getMinutes() - duration)
+    endTimeReq.setMinutes(refTime.getMinutes() + duration)
+
+    // Getting all locations of users with given phone numbers
+    let heatmaps = {}
+    for(let number of phoneNumbers){
+        let records = await CDR.find({callerNumber : number, startTime : {$gte : startTimeReq, $lte : endTimeReq}})
+        records.sort((a, b) => a.startTime > b.startTime)
+        heatmaps[number] = records.map((record) => {
+            return {
+                location : JSON.parse(JSON.stringify(record.originLatLong)),
+                timestamp : record.startTime    
+            }
+        })
+    } 
+
+    return res.json({
+        heatmaps : heatmaps,
+        code : 200
+    })
+}
+
+
 // Get all records within a given time duration and location range
 let getRecords = async(req, res) => {
     let refTime = new Date(req.body.refTime)
@@ -403,5 +444,6 @@ module.exports = {
     getLogs : getLogs,
     getLocationsList: getLocationsList,
     getLatLong: getLatLong,
-    getStatistics : getStatistics
+    getStatistics : getStatistics,
+    getHeatmapLocations : getHeatmapLocations
 }
