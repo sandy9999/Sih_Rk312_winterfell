@@ -18,6 +18,15 @@ profileRouter.post('/getProfile',
     profileController.getProfile
 )
 
+// Getting search results
+profileRouter.post('/getSearchResults',
+	profileController.getSearchResults
+)
+
+profileRouter.post('/getUserDetails',
+	profileController.getUserDetails
+)
+
 module.exports = {
     profileRouter : profileRouter
 }
