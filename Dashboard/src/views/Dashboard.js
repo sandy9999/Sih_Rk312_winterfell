@@ -52,15 +52,25 @@ import {
   pieExample
 } from "variables/charts.js";
 
+const config = require("../config.js")
+
 class Dashboard extends React.Component {
   constructor(props) {
     super(props);
     let cdrCounts = []
     let ipdrCounts = [11,21,31,41,15,6,1,0,0,0,0,0]
     let smsCounts = [11,5,35,42,25,36,5,0,0,0,0,0]
+    let highestCallers = [
+      {caller : "Ram", duration : 53},
+      {caller :  "Sandhya", duration : 20},
+      {caller :  "9874561230", duration : 110},
+      {caller :  "Hrishi", duration : 80},
+      {caller :  "9874563211", duration : 100}
+    ]
+
     for(let i = 1; i <= 12; ++i){
       cdrCounts.push(0)
-      // ipdrCounts.push(0)
+      ipdrCounts.push(0)
     }
 
     this.state = {
@@ -70,23 +80,34 @@ class Dashboard extends React.Component {
       smsCounts: smsCounts,
       notes : [],
       cdrRecords : [],
+      highestCallers : highestCallers
     };
 
-        
     // Getting the CDR Statistics
-    fetch("http://localhost:8080/cdr/getStatistics/")
+    fetch(`${config.BASE_URL}/cdr/getStatistics/`)
       .then(response => response.json())
       .then((data) => {
+        console.log(data)
         this.setState({
-          cdrCounts : data.cdrCounts
+          cdrCounts : data.cdrCounts,
+          smsCounts : data.smsCounts,
+          highestCallers : data.highestCallers
         })
       })
       .catch((err) => console.log(err))
 
-    // TODO : Get IPDR Data and update counts
+    // Get IPDR Data and update counts
+    fetch(`${config.BASE_URL}/ipdr/getStatistics/`)
+      .then(response => response.json())
+      .then((data) => {
+        this.setState({
+          ipdrCounts : data.ipdrCounts
+        })
+      })
+      .catch((err) => console.log(err))
 
     // Getting all the notes stored in the DB
-    fetch("http://localhost:8080/note/getAllNotes/")
+    fetch(`${config.BASE_URL}/note/getAllNotes/`)
     .then(response => response.json())
       .then((data) => {
         let allNotes = []
@@ -108,7 +129,7 @@ class Dashboard extends React.Component {
       .catch((err) => console.log(err))
 
       // Getting all CDR records
-    fetch("http://localhost:8080/cdr/getAllRecords/")
+    fetch(`${config.BASE_URL}/cdr/getAllRecords/`)
     .then(response => response.json())
       .then((data) => {
         let cdrData = []
@@ -135,17 +156,27 @@ class Dashboard extends React.Component {
     });
   };
   render() {
-    let graphData = {}
-    
+    let graphData = Object.assign({}, graphDataFormat)
+    let callDurationData = Object.assign({}, chartExample3.data)
+
+    // Splitting highest callers into labels and durations
+    let highestLabels = []
+    let highestDurations = []
+    let totalCallDuration = 0
+    for(let highestCaller of this.state.highestCallers){
+      highestLabels.push(highestCaller.caller)
+      highestDurations.push(highestCaller.duration)
+      totalCallDuration += highestCaller.duration
+    }
+    callDurationData.labels = highestLabels
+    callDurationData.datasets[0].data = highestDurations 
+
     // Getting the graph data
-    if(this.state.bigChartData === "data1"){
-      graphData = graphDataFormat
+    if(this.state.bigChartData === "data1"){      
       graphData.datasets[0].data = this.state.cdrCounts
     }else if(this.state.bigChartData === "data2"){
-      graphData = graphDataFormat
       graphData.datasets[0].data = this.state.ipdrCounts
     }else if(this.state.bigChartData === "data3"){
-      graphData = graphDataFormat
       graphData.datasets[0].data = this.state.smsCounts
     }
 
@@ -327,13 +358,13 @@ class Dashboard extends React.Component {
                   <h5 className="card-category">Maximum Call Durations</h5>
                   <CardTitle tag="h3">
                     <i className="tim-icons icon-chat-33 text-primary" />{" "}
-                    343 mins
+                    {totalCallDuration} mins
                   </CardTitle>
                 </CardHeader>
                 <CardBody>
                   <div className="chart-area">
                     <Bar
-                      data={chartExample3.data}
+                      data={callDurationData}
                       options={chartExample3.options}
                     />
                   </div>
@@ -410,7 +441,7 @@ class Dashboard extends React.Component {
             </Col>
             <Col lg="6" md="12">
               <Card>
-                <CardHeader>
+                <CardHeader style={{overflowY : "hidden", height : "10px"}}>
                   <CardTitle tag="h4">CDR Data</CardTitle>
                 </CardHeader>
                 <CardBody>

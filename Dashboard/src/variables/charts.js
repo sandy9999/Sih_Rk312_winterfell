@@ -253,23 +253,12 @@ let chartExample2 = {
 // // // used inside src/views/Dashboard.js
 // #########################################
 let chartExample3 = {
-  data: canvas => {
-    let ctx = canvas.getContext("2d");
-
-    let gradientStroke = ctx.createLinearGradient(0, 230, 0, 50);
-
-    gradientStroke.addColorStop(1, "rgba(72,72,176,0.1)");
-    gradientStroke.addColorStop(0.4, "rgba(72,72,176,0.0)");
-    gradientStroke.addColorStop(0, "rgba(119,52,169,0)"); //purple colors
-
-    return {
+  data: {
       labels: ["Ram", "Sandhya", "9874561230", "Hrishi", "9874563211"],
       datasets: [
         {
           label: "Duration",
           fill: true,
-          backgroundColor: gradientStroke,
-          hoverBackgroundColor: gradientStroke,
           borderColor: "#d048b6",
           borderWidth: 2,
           borderDash: [],
@@ -277,7 +266,6 @@ let chartExample3 = {
           data: [53, 20, 110, 80, 100]
         }
       ]
-    };
   },
   options: {
     maintainAspectRatio: false,
