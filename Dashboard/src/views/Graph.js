@@ -17,14 +17,33 @@
 */
 
 // reactstrap components
-import { Card, CardHeader, CardBody, CardTitle, Row, Col } from "reactstrap";
+import {
+  Card,
+  CardHeader,
+  CardBody,
+  Row,
+  Col,
+  Form,
+  FormGroup,
+  Label,
+  Input,
+  Spinner,
+  ListGroup,
+  ListGroupItem,
+  Button,
+  CardTitle
+} from "reactstrap";
+import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+
 import React, { useState, useEffect, useContext } from 'react';
 import GraphWrapper from "./GraphWrappers/GraphWrapper"
 import { store } from "../store";
 import "./GraphWrappers/GraphWrapper.css"
 import FixedPlugin from "../components/FixedPlugin/FixedPlugin.js";
-const axios = require("axios")  
-const config = require("../config.js")
+import Axios from 'axios';
+const config = require("../config");
+
+
 
 export default function Typography() {
   const [graph, setGraph] = useState({ nodes: [], links: [] });
@@ -40,6 +59,10 @@ export default function Typography() {
   const [showCard, setShowCard] = useState(false);
   const [cardStatus, setCardStatus] = useState(0); //0 nothing 1 Profile 2 Logs
   const [details, setDetails] = useState();
+  const [modal, setModal] = useState(false);
+  const [edge, setEdge] = useState([]);
+  const [notes, setNotes] = useState("");
+
 
   const getGreenToRed = (percent) => {
     const r = 255 * percent/100;
@@ -67,45 +90,101 @@ export default function Typography() {
     }
   }, [cardStatus]);
 
+  useEffect(() => {
+    if (clickedNode != null) {
+      setModal(true);
+    }
+    if (details != null) {
+      setModal(true);
+    }
+  }, [clickedNode, details])
+
   const handleBgClick = color => {
-    
+
   };
 
-  const handleDrawerOpen = () => {
-    setOpen(true);
-  };
-
-  const handleDrawerClose = () => {
-    setOpen(false);
-  };
+  const toggle = () => setModal(!modal);
 
   return (
     <>
       <div className="content">
         <Row>
-          <Col md="12">
-            <Card>
-              <CardTitle style={{margin:"5px"}}>
-                <h1>Graph Visualisation</h1>
-              </CardTitle>
-              <CardBody>
-                <div className={"drawerHeader"} />
-                {
-                  graphReady && <GraphWrapper data={graph} setCardStatus={setCardStatus} setClickedNode={setClickedNode} setShowCard={setShowCard} setDetails={setDetails} />
-                }
-              </CardBody>
-            </Card>
-          </Col>
+          <Card style={{ maxHeight: "75vh" }}>
+            <CardTitle style={{ margin: "5px" }}>
+              <h1>Graph Visualisation</h1>
+            </CardTitle>
+            <CardBody>
+              <div className={"drawerHeader"} />
+              {
+                graphReady && <GraphWrapper setEdge={setEdge} data={graph} setCardStatus={setCardStatus} setClickedNode={setClickedNode} setShowCard={setShowCard} setDetails={setDetails} />
+              }
+            </CardBody>
+          </Card>
         </Row>
       </div>
       <FixedPlugin
         bgColor={"white"}
         handleBgClick={handleBgClick}
-        nodes = {nodes}
-        setNodes = {setNodes}
-        setGraph = {setGraph}
-        setGraphReady = {setGraphReady}
+        nodes={nodes}
+        setNodes={setNodes}
+        setGraph={setGraph}
+        setGraphReady={setGraphReady}
       />
+      <Modal isOpen={modal} toggle={toggle} >
+        <ModalHeader toggle={toggle}>
+          {clickedNode ? "Profile" : "Details"}
+        </ModalHeader>
+        <ModalBody>
+          {
+            clickedNode && Object.keys(clickedNode).map((key, index) => {
+              if (clickedNode[key] != undefined) {
+                return (
+                  <Row>
+                    <Col xs="6">{key}</Col>
+                    <Col xs="6">{clickedNode[key]}</Col>
+                  </Row>
+                )
+              }
+            })
+          }
+          {
+            (details && details[0]) && details[0].map((logItem, index) => {
+              return (
+                <Row>
+                  <Col xs="6">{logItem["startTime"]}</Col>
+                  <Col xs="6">{logItem["callType"]}</Col>
+                </Row>
+              )
+            })
+          }
+          {
+            (details && details[1]) && details[1][0]["notes"].map((notesItem, index) => {
+              return (
+                <Row>
+                  <Col xs={6}>Details:</Col>
+                  <Col xs={6}>{notesItem}</Col>
+                </Row>
+              )
+            })
+          }
+          {
+            details && <>
+              <Input style={{color:"black"}} type="text" name="notes" id="notes" placeholder="Add a Note"
+                onChange={(e) => setNotes(e.target.value)} />
+              <Button onClick={async () => {
+                try{
+                  let data = await Axios.post(`${config.BASE_URL}/note/addNote`, { numbers: edge, note:notes });
+                  toggle();
+                }catch (err){
+                  alert("Not Submitted");
+                  console.log(err);
+                }
+                
+              }}>Add</Button>
+            </>
+          }
+        </ModalBody>
+      </Modal>
     </>
   );
 }

@@ -125,6 +125,7 @@ onClickLink = async (source, target) => {
     try {
         let data = await Axios.post(config.BASE_URL+"/cdr/getLogs",{"numbers":[source,target]});
         this.props.setDetails([data.data.logs,data.data.notes]);
+        this.props.setEdge([source,target]);
         this.props.setShowCard(true);
         this.props.setCardStatus(2);
         } catch(e){
