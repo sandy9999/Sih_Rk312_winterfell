@@ -38,7 +38,6 @@ let getStatistics = async(req, res) => {
     })
 }
 
-
 // Checks if the call data record is valid 
 let validateIPDRRecord = async(req, res, next) => {
     let ipdrRecord = req.body

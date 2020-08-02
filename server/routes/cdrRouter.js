@@ -50,6 +50,11 @@ cdrRouter.get('/getStatistics',
     cdrController.getStatistics
 )
 
+// Getting the heatmap locations
+cdrRouter.post('/getHeatmapLocations',
+    cdrController.getHeatmapLocations
+)
+
 // // Getting the details for a particular record
 // cdrRouter.get('/getOrder', 
 //     customerController.getOrder
