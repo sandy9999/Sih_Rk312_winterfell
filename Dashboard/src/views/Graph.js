@@ -23,8 +23,8 @@ import GraphWrapper from "./GraphWrappers/GraphWrapper"
 import { store } from "../store";
 import "./GraphWrappers/GraphWrapper.css"
 import FixedPlugin from "../components/FixedPlugin/FixedPlugin.js";
-
-
+const axios = require("axios")  
+const config = require("../config.js")
 
 export default function Typography() {
   const [graph, setGraph] = useState({ nodes: [], links: [] });
@@ -47,12 +47,10 @@ export default function Typography() {
     return 'rgb('+r+','+g+',0)';
   }
 
-
   //global context
   const { state: globalState, dispatch: globalStateDispatch } = useContext(
     store
   );
-  console.log("glob", globalState);
   useEffect(() => {
     if (globalState.graph_nodes && globalState.graph_nodes.length !== 0)
       setNodes(globalState.graph_nodes);
@@ -60,7 +58,6 @@ export default function Typography() {
       axios.post(`${config.BASE_URL}/cdr/getAdjacency`, { "numbers": nodes })
       .then(res => {
         let message = res.data.message;
-        console.log(message);
         // parse the response into graph form and set into state
         let graph = { nodes: [], links: [] };
         for (let nodeA in message) {
@@ -80,9 +77,7 @@ export default function Typography() {
               if (sameIMEI) {
                 graph.links.push({ "source": nodeA, "target": nodeB, color: "yellow", label: "same IMEI" });
                 // graph.links.push({"source": nodeB, "target": nodeA, color: "yellow"});
-                console.log("bye?", message[nodeB].nodeA);
                 delete message[nodeB].nodeA;
-                console.log("bye bye", message[nodeB].nodeA);
               }
               else {
                 // alpha*duration + beta*numCalls = strength of relation
