@@ -21,7 +21,7 @@ import Map from "views/Map.js";
 import Notifications from "views/Notifications.js";
 import Rtl from "views/Rtl.js";
 import TableList from "views/TableList.js";
-import Typography from "views/Typography.js";
+import Graph from "views/Graph.js";
 import UserProfile from "views/UserProfile.js";
 
 var routes = [
@@ -50,6 +50,14 @@ var routes = [
     layout: "/admin"
   },
   {
+    path: "/typography",
+    name: "Graph",
+    rtlName: "طباعة",
+    icon: "tim-icons icon-align-center",
+    component: Graph,
+    layout: "/admin"
+  },
+  {
     path: "/notifications",
     name: "Notifications",
     rtlName: "إخطارات",
@@ -71,14 +79,6 @@ var routes = [
     rtlName: "قائمة الجدول",
     icon: "tim-icons icon-puzzle-10",
     component: TableList,
-    layout: "/admin"
-  },
-  {
-    path: "/typography",
-    name: "Typography",
-    rtlName: "طباعة",
-    icon: "tim-icons icon-align-center",
-    component: Typography,
     layout: "/admin"
   },
   {

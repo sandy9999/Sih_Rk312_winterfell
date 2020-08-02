@@ -1,0 +1,25 @@
+/* style to make graph svg stretch to full screen width */
+#graph-graph-wrapper svg {
+    width: 100% !important;
+    height: 500px !important;
+}
+
+visible {
+    visibility: 'visible';
+    width: '25vw !important';
+    position: 'absolute';
+    right: 0;
+    padding:'5px';
+  }
+  hidden{
+    visibility: 'hidden';
+  }
+  cardClose{
+    position:"absolute";
+    right: "0";
+    top: "15px";
+  }
+  root {
+    display: 'flex';
+  }
+  

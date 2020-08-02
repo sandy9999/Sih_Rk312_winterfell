@@ -18,13 +18,27 @@
 import React, { Component } from "react";
 
 // reactstrap components
-import { Button } from "reactstrap";
+import { Button, Form, FormGroup, Label, Input, FormText } from 'reactstrap';
+import { ListGroup, ListGroupItem } from 'reactstrap';
+import { node } from "prop-types";
+const config =  require('../../config')
+const axios = require('axios').default;
+const getGreenToRed = (percent) => {
+  const r = 255 * percent/100;
+  const g = 255 - (255 * percent/100);
+  return 'rgb('+r+','+g+',0)';
+}
+
 
 class FixedPlugin extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      classes: "dropdown show-dropdown"
+      classes: "dropdown show-dropdown",
+      nodes: this.props.nodes,
+      newNode: "",
+      duration: 0,
+      count: 0
     };
   }
   handleClick = () => {
@@ -34,6 +48,7 @@ class FixedPlugin extends Component {
       this.setState({ classes: "dropdown show-dropdown" });
     }
   };
+
   activateMode = mode => {
     switch (mode) {
       case "light":
@@ -52,86 +67,98 @@ class FixedPlugin extends Component {
             <i className="fa fa-cog fa-2x" />
           </div>
           <ul className="dropdown-menu show">
-            <li className="header-title">SIDEBAR BACKGROUND</li>
-            <li className="adjustments-line">
-              <div className="badge-colors text-center">
-                <span
-                  className={
-                    this.props.bgColor === "primary"
-                      ? "badge filter badge-primary active"
-                      : "badge filter badge-primary"
-                  }
-                  data-color="primary"
-                  onClick={() => {
-                    this.props.handleBgClick("primary");
-                  }}
-                />{" "}
-                <span
-                  className={
-                    this.props.bgColor === "blue"
-                      ? "badge filter badge-info active"
-                      : "badge filter badge-info"
-                  }
-                  data-color="blue"
-                  onClick={() => {
-                    this.props.handleBgClick("blue");
-                  }}
-                />{" "}
-                <span
-                  className={
-                    this.props.bgColor === "green"
-                      ? "badge filter badge-success active"
-                      : "badge filter badge-success"
-                  }
-                  data-color="green"
-                  onClick={() => {
-                    this.props.handleBgClick("green");
-                  }}
-                />{" "}
-              </div>
+            <li className="header-title">NODES</li>
+            <li>
+              {this.props.nodes.map((value, key) => {
+                return <ListGroup key={key}>
+                  <ListGroupItem>
+                  <Button close onClick={(e) => {
+                    this.props.setNodes(this.props.nodes.filter(node => node !== value))}}/>
+                    
+                    {value}
+                  </ListGroupItem>
+                </ListGroup>
+              })}
             </li>
-            <li className="adjustments-line text-center color-change">
-              <span className="color-label">LIGHT MODE</span>{" "}
-              <span
-                className="badge light-badge mr-2"
-                onClick={() => this.activateMode("light")}
-              />{" "}
-              <span
-                className="badge dark-badge ml-2"
-                onClick={() => this.activateMode("dark")}
-              />{" "}
-              <span className="color-label">DARK MODE</span>{" "}
+            <li style={{ width: "100%" }}>
+              <FormGroup>
+                <Input type="text" name="node" id="nodeInput" placeholder="addNode" onChange={(e) => this.setState({ newNode: e.target.value })} />
+              </FormGroup>
             </li>
-            <li className="button-container">
+            <Button
+              style={{ width: "100%" }}
+              variant="contained"
+              color="default"
+              // startIcon={<PersonAdd />}
+              onClick={() => {
+                // just checking for 10 digit number
+                const indianPhonePattern = RegExp("^([6-9]{1})([0-9]{9})$");
+                if (indianPhonePattern.test(this.state.newNode)) {
+                  this.props.setNodes(nodes => [...nodes, this.state.newNode]);
+                }
+                this.setState({ newNode: "" });
+              }}
+            >ADD NODE</Button>
+            <li style={{ width: "100%" }}>
+              <FormGroup>
+                <Input type="text" name="node" id="nodeInput" placeholder="Enter Min Call Duration" onChange={(e) => this.setState({ duration: e.target.value })} />
+                <Input type="text" name="node" id="nodeInput" placeholder="Enter Min Num of Calls" onChange={(e) => this.setState({ count: e.target.value })} />
+              </FormGroup>
+            </li>
+            <li>
               <Button
-                href="https://www.creative-tim.com/product/black-dashboard-react"
-                color="primary"
-                block
-                className="btn-round"
-              >
-                Download Now
-              </Button>
-              <Button
+                variant="contained"
                 color="default"
-                block
-                className="btn-round"
-                outline
-                href="https://demos.creative-tim.com/black-dashboard-react/#/documentation/tutorial"
+                // startIcon={<Refresh />}
+                onClick={() => {
+                  axios.post(`${config.BASE_URL}/cdr/getAdjacency`, { "numbers": this.props.nodes })
+                    .then(res => {
+                      let message = res.data.message;
+                      console.log(message);
+                      // parse the response into graph form and set into state
+                      let graph = { nodes: [], links: [] };
+                      for (let nodeA in message) {
+                        graph.nodes.push({ "id": nodeA });
+                        for (let nodeB in message[nodeA]) {
+                          // check if the nodeB is already there, else push
+                          let duration = message[nodeA][nodeB].duration;
+                          let numCalls = message[nodeA][nodeB].numCalls;
+                          let sameIMEI = message[nodeA][nodeB].sameIMEI;
+                          console.log(duration, this.state.duration)
+                          if (duration >= this.state.duration && numCalls >= this.state.count) {
+                            let currentNode = graph.nodes.filter(o => o["id"] === nodeB)
+                            if (currentNode.length === 0) {
+                              graph.nodes.push({ "id": nodeB })
+                            }
+                            //check if it's a same IMEI link
+                            
+                            if (sameIMEI) {
+                              console.log("Asd");
+                              graph.links.push({ "source": nodeA, "target": nodeB, color: "yellow", label: "same IMEI" });
+                              // graph.links.push({"source": nodeB, "target": nodeA, color: "yellow"});
+                              console.log("bye?", message[nodeB].nodeA);
+                              delete message[nodeB].nodeA;
+                              console.log("bye bye", message[nodeB].nodeA);
+                            }
+                            else {
+                              console.log("Asd");
+                              // alpha*duration + beta*numCalls = strength of relation
+                              let alpha = 0.5;
+                              let beta = 0.5;
+                              let percent = (alpha * (duration / 106) + beta * (numCalls / 2)) * 100;
+                              graph.links.push({ "source": nodeA, "target": nodeB, color: "white" });
+                            }
+                          }
+                        }
+                      }
+                      console.log(graph)
+                      this.props.setGraph(graph); this.props.setGraphReady(true);
+                      this.handleClick()
+                    })
+                }}
               >
-                Documentation
-              </Button>
-            </li>
-            <li className="header-title">Want more components?</li>
-            <li className="button-container">
-              <Button
-                href="https://www.creative-tim.com/product/black-dashboard-pro-react"
-                className="btn-round"
-                disabled
-                block
-                color="danger"
-              >
-                Get pro version
-              </Button>
+                Re-render graph
+            </Button>
             </li>
           </ul>
         </div>
