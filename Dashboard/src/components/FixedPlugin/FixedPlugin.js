@@ -144,7 +144,7 @@ class FixedPlugin extends Component {
                               let alpha = 0.5;
                               let beta = 0.5;
                               let percent = (alpha * (duration / 106) + beta * (numCalls / 2)) * 100;
-                              graph.links.push({ "source": nodeA, "target": nodeB, color: "white" });
+                              graph.links.push({ "source": nodeA, "target": nodeB, color: getGreenToRed(percent) });
                             }
                           }
                         }

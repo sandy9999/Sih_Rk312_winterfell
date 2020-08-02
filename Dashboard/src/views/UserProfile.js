@@ -144,8 +144,7 @@ class UserProfile extends React.Component {
                           <label>About Me</label>
                           <Input
                             cols="80"
-                            defaultValue="Lamborghini Mercy, Your chick she so thirsty, I'm in
-                            that two seat Lambo."
+                            defaultValue="lorem ipsum"
                             placeholder="Here can be your description"
                             rows="4"
                             type="textarea"
@@ -182,9 +181,7 @@ class UserProfile extends React.Component {
                     <p className="description">Ceo/Co-Founder</p>
                   </div>
                   <div className="card-description">
-                    Do not be scared of the truth because we need to restart the
-                    human foundation in truth And I love you like Kanye loves
-                    Kanye I love Rick Owens’ bed design but the back is...
+                    lorem ipsum
                   </div>
                 </CardBody>
                 <CardFooter>
