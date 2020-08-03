@@ -63,9 +63,9 @@ class Profile extends React.Component {
       ipdrCounts.push(0)
       smsCounts.push(0)
     }
-    
+    {console.log(this.props)}
     this.state = {
-      srcNumber: "9696122597",
+      srcNumber: this.props.number!=null?this.props.number:"9751893351",
       bigChartData: "data1",
       cdrCounts : cdrCounts,
       ipdrCounts : ipdrCounts,
