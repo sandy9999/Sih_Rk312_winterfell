@@ -24,6 +24,7 @@ import PerfectScrollbar from "perfect-scrollbar";
 import AdminNavbar from "components/Navbars/AdminNavbar.js";
 import Footer from "components/Footer/Footer.js";
 import Sidebar from "components/Sidebar/Sidebar.js";
+import Profile from "views/Profile";
 import FixedPlugin from "components/FixedPlugin/FixedPlugin.js";
 
 import routes from "routes.js";
@@ -38,7 +39,8 @@ class Admin extends React.Component {
     this.state = {
       backgroundColor: "blue",
       sidebarOpened:
-        document.documentElement.className.indexOf("nav-open") !== -1
+        document.documentElement.className.indexOf("nav-open") !== -1,
+      searchSelection: null
     };
   }
   componentDidMount() {
@@ -84,6 +86,7 @@ class Admin extends React.Component {
           <Route
             path={prop.layout + prop.path}
             component={prop.component}
+            number={this.state.searchSelection}
             key={key}
           />
         );
@@ -107,6 +110,9 @@ class Admin extends React.Component {
     }
     return "Brand";
   };
+  stateSelect = (text) => {
+    this.setState({searchSelection:text});
+  }
   render() {
     return (
       <>
@@ -129,11 +135,13 @@ class Admin extends React.Component {
           >
             <AdminNavbar
               {...this.props}
+              stateSelect = {this.stateSelect}
               brandText={this.getBrandText(this.props.location.pathname)}
               toggleSidebar={this.toggleSidebar}
               sidebarOpened={this.state.sidebarOpened}
             />
             <Switch>
+              <Route path="/admin/profile/" component={()=> <Profile number={this.state.searchSelection}/> }/>
               {this.getRoutes(routes)}
               <Redirect from="*" to="/admin/dashboard"/>
             </Switch>

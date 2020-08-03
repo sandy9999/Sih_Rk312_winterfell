@@ -16,6 +16,8 @@
 
 */
 import React from "react";
+import { Route } from "react-router-dom";
+
 // nodejs library that concatenates classes
 import classNames from "classnames";
 
@@ -34,8 +36,14 @@ import {
   NavLink,
   Nav,
   Container,
-  Modal
+  Modal,
+  Row,
+  Col,
 } from "reactstrap";
+import { ListGroup, ListGroupItem } from 'reactstrap';
+import Axios from 'axios';
+const config = require("../../config");
+
 
 class AdminNavbar extends React.Component {
   constructor(props) {
@@ -43,7 +51,10 @@ class AdminNavbar extends React.Component {
     this.state = {
       collapseOpen: false,
       modalSearch: false,
-      color: "navbar-transparent"
+      color: "navbar-transparent",
+      searchInput: "",
+      searchResult: [],
+      profile: null,
     };
   }
   componentDidMount() {
@@ -64,6 +75,15 @@ class AdminNavbar extends React.Component {
       });
     }
   };
+
+  search = async () => {
+    try {
+      let data = await Axios.post(`${config.BASE_URL}/profile/getSearchResults/`, { searchText: this.state.searchInput });
+      this.setState({ searchResult: data.data.profiles });
+    } catch (e) {
+      console.log(e);
+    }
+  }
   // this function opens and closes the collapse on small devices
   toggleCollapse = () => {
     if (this.state.collapseOpen) {
@@ -87,6 +107,7 @@ class AdminNavbar extends React.Component {
   };
   render() {
     return (
+
       <>
         <Navbar
           className={classNames("navbar-absolute", this.state.color)}
@@ -217,18 +238,38 @@ class AdminNavbar extends React.Component {
           isOpen={this.state.modalSearch}
           toggle={this.toggleModalSearch}
         >
-          <div className="modal-header">
-            <Input id="inlineFormInputGroup" placeholder="SEARCH" type="text" />
-            <button
-              aria-label="Close"
-              className="close"
-              data-dismiss="modal"
-              type="button"
-              onClick={this.toggleModalSearch}
-            >
-              <i className="tim-icons icon-simple-remove" />
-            </button>
-          </div>
+          <Row>
+            <div className="modal-header">
+              <Input id="inlineFormInputGroup" placeholder="SEARCH" type="text" onChange={(e) => {
+                this.setState({
+                  searchInput: e.target.value
+                })
+              }} />
+              <button
+                aria-label="Close"
+                className="close"
+                data-dismiss="modal"
+                type="button"
+                onClick={this.search}
+              >
+                <i className="tim-icons icon-zoom-split" />
+              </button>
+            </div>
+          </Row>
+          <Row>
+            {
+              this.state.searchResult.length != 0 && <ListGroup style={{ padding: "24px", width: "100%", color: "black" }}>
+                {this.state.searchResult.map((profile, key) => {
+                  return (
+                    <ListGroupItem style={{ color: "black" }} onClick={async () => {
+                      this.props.stateSelect(profile["phoneNumber"]);
+                      this.props.history.push("/admin/profile");
+                    }}>{profile["phoneNumber"]}</ListGroupItem>
+                  )
+                })}
+              </ListGroup>
+            }
+          </Row>
         </Modal>
       </>
     );
