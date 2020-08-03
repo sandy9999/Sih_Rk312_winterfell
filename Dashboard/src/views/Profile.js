@@ -32,6 +32,8 @@ import {
   CardFooter,
   Form,
   FormGroup,
+  ListGroup,
+  ListGroupItem,
   Input,
   Table,
   Row,
@@ -63,7 +65,7 @@ class Profile extends React.Component {
     }
     
     this.state = {
-      srcNumber: "9751893351",
+      srcNumber: "9696122597",
       bigChartData: "data1",
       cdrCounts : cdrCounts,
       ipdrCounts : ipdrCounts,
@@ -197,7 +199,6 @@ class Profile extends React.Component {
     let pieData = {}
     // Getting the top callers pie data
     pieData = pieTopCalls
-    console.log("pieeee",pieData)
     pieData.labels = this.state.topCallLabels
     pieData.datasets[0].data = this.state.topCallFreqs
     
@@ -255,11 +256,11 @@ class Profile extends React.Component {
     }
     let ipRecordComponents = ipdrRecords.map(createIPDRRecord)
 
-    function updateProfile (){
-      fetch("http://localhost:8080/profile/update", {
+    let updateProfile = () => {
+      fetch("http://localhost:8080/profile/updateUser", {
       method: "POST", 
       body: JSON.stringify({
-        srcNumber: this.state.srcNumber,
+        refNumber: this.state.srcNumber,
         name: this.state.name,
         email: this.state.email,
         aadharNumber: this.state.aadharNumber,
@@ -276,6 +277,16 @@ class Profile extends React.Component {
     })
     .catch((err) => console.log(err))
     }
+
+    let handleProfileChange = (element, value) => {
+      console.log(value)
+      let newState = this.state;
+      newState[element] = value
+      this.setState({
+        newState
+      })
+    }
+
     return (
       <>
       <div className="content">
@@ -328,6 +339,9 @@ class Profile extends React.Component {
                           <Input
                             type="text"
                             defaultValue={this.state.name}
+                            onChange={(e) => {
+                              handleProfileChange("name",e.target.value)
+                            }}
                           />
                         </FormGroup>
                       </Col>
@@ -337,6 +351,9 @@ class Profile extends React.Component {
                           <Input 
                            type="email"
                            defaultValue={this.state.email}
+                           onChange={(e) => {
+                            handleProfileChange("email",e.target.value)
+                            }}
                            placeholder="mike@email.com"
                           />
                         </FormGroup>
@@ -346,11 +363,31 @@ class Profile extends React.Component {
                           <label>Aadhar Number</label>
                           <Input
                             defaultValue={this.state.aadharNumber}
+                            onChange={(e) => {
+                              handleProfileChange("aadharNumber",e.target.value)
+                            }}
                             type="text"
                           />
                         </FormGroup>
                       </Col>
                     </Row>
+                    <label>Associated Phone Numbers</label>
+                    {
+                    this.state.associatedPhoneNumbers && this.state.associatedPhoneNumbers.map((value, key) => {
+                      return <ListGroup key={key}>
+                          {value}
+                      </ListGroup>
+                    })}
+                    <br />
+                    <label>Associated IMEIs</label>
+                    {
+                    this.state.associatedImeis && this.state.associatedImeis.map((value, key) => {
+                      return <ListGroup key={key}>
+                          {value}
+                      </ListGroup>
+                    })}
+                    
+                    
                     <Row>
                       <Col md="8">
                         <FormGroup>
@@ -361,6 +398,9 @@ class Profile extends React.Component {
                             placeholder="Here can be your description"
                             rows="4"
                             type="textarea"
+                            onChange={(e) => {
+                              handleProfileChange("remarks",e.target.value)
+                            }}
                           />
                         </FormGroup>
                       </Col>
