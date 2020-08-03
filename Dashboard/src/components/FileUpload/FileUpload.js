@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import Fab from '@material-ui/core/Fab'
 import AddIcon from '@material-ui/icons/Add'
-import './CsvUpload.css';
+import CloudUpload from '@material-ui/icons/CloudUpload'
+import './FileUpload.css';
 import axios from 'axios';
 const config = require('../../config')
 
-function submitForm(contentType, data, setResponse) {
-    axios.post(`${config.BASE_URL}/cdr/uploadCSV`, data, {headers: {'content-type': contentType}})
+function submitForm(data, apiEndPoint, setResponse) {
+    const url = `${config.BASE_URL}` + apiEndPoint;
+    axios.post(url, data, {headers: {'content-type': "multipart/form-data"}})
     .then((response) => {
     setResponse(response.data);
     }).catch((error) => {
@@ -15,18 +17,19 @@ function submitForm(contentType, data, setResponse) {
 }
 
 
-function CsvUpload() {
+function FileUpload(props) {
+  // super(props);
   const [file, setFile] = useState(null);
 
   function uploadWithFormData() {
     const formData = new FormData();
     formData.append("file", file);
-    submitForm("multipart/form-data", formData, (msg) => console.log(msg))
+    submitForm(formData, props.apiEndPoint, (msg) => console.log(msg))
   }
 
   return (
-    <div className="CsvUpload">
-        <p>Upload your CDR data in the form of a CSV file here</p>
+    <div className="fileUpload">
+        <p>Upload your {props.name} data file here</p>
         <label htmlFor="upload-data">
         <input
             style={{ display: 'none' }}
@@ -36,20 +39,24 @@ function CsvUpload() {
             onChange={(e) => setFile(e.target.files[0])}
         />
         <Fab
-            color="secondary"
+            color="primary"
             size="small"
             component="span"
             aria-label="add"
             variant="extended"
         >
-        <AddIcon /> Upload CDR CSV file
+        <AddIcon /> Upload {props.name} file
         </Fab>
         </label>
+        <br />
         <Fab color="primary" size="small" component="span" aria-label="add" onClick={uploadWithFormData}>
-        <AddIcon />
+        <CloudUpload />
         </Fab>
+        <span className="uploadedFile"> 
+        {file &&  file.name}
+        </span>
     </div>
   );
 }
 
-export default CsvUpload;
+export default FileUpload;
