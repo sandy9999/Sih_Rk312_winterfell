@@ -162,11 +162,43 @@ let getUserDetails = async(req, res) => {
     })
 }
 
+// Updating a user's records
+let updateUserDetails = async(req, res) => {
+    let phoneNumber = req.body.refNumber
+    if(!phoneNumber){
+        return res.json({
+            message : "Didn't receive property refNumber",
+            code : 400
+        })
+    }
+
+    let updateFields = JSON.parse(JSON.stringify(req.body))
+    delete updateFields.refNumber
+
+    let profileFields = ["name", "imei", "imsi", "email", "phoneNumber", "associatedPhoneNumbers", "associatedImeis", "age", "aadharNumber", "company","address","remarks"]
+    for(let field in updateFields){
+        if(!(profileFields.includes(field))){
+            return res.json({
+                message : "Property " + field + " doesn't exist in the profile schema",
+                code : 400
+            })
+        }
+    }
+
+    console.log(updateFields)
+    await Profile.findOneAndUpdate({phoneNumber : phoneNumber}, {$set : updateFields})
+    return res.json({
+        message : "Successfully updated the profile for number " + phoneNumber,
+        code : 200
+    })
+}
+
 module.exports = {
     validateProfile : validateProfile,
     addProfile : addProfile,
     getAllProfiles : getAllProfiles, 
     getProfile : getProfile,
     getSearchResults : getSearchResults,
-    getUserDetails : getUserDetails
+    getUserDetails : getUserDetails,
+    updateUserDetails : updateUserDetails
 }
