@@ -348,6 +348,43 @@ let getLogs = async(req, res) => {
     })
 }
 
+// get single phoneNumber statistics, weekly and monthly
+let getSinglePhoneStatistics = async(req, res) => {
+    let srcNumber = req.body.phoneNumber;
+    if(!srcNumber){
+        return res.json({
+            message : "No caller number received",
+            code : 200
+        })
+    }
+    // Getting the current year
+    let currentDate = new Date(Date.now())
+    let currentYear = currentDate.getFullYear()
+    
+    // Getting the number of records for each month
+    let outgoing = await CDR.find({callerNumber : srcNumber})
+    let incoming = await CDR.find({calledNumber : srcNumber})
+    let allRecords = outgoing.concat(incoming);
+    let monthCounts = []
+    for(let i = 1; i <= 12; ++i){
+        monthCounts.push(0)
+    }
+
+    for(let record of allRecords){
+        let startTime = record.startTime
+        let month = startTime.getMonth()
+        let year = startTime.getFullYear()
+        if(year == currentYear){
+            monthCounts[month - 1] += 1
+        }
+    }
+    return res.json({
+        cdrCounts : monthCounts,
+        code : 200     
+    })
+}
+
+
 // Returns a statistics required for the dashboard
 let getStatistics = async(req, res) => {
     // Getting the current year
@@ -445,5 +482,6 @@ module.exports = {
     getLocationsList: getLocationsList,
     getLatLong: getLatLong,
     getStatistics : getStatistics,
-    getHeatmapLocations : getHeatmapLocations
+    getHeatmapLocations : getHeatmapLocations,
+    getSinglePhoneStatistics : getSinglePhoneStatistics
 }

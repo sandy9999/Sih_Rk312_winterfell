@@ -19,21 +19,14 @@
 // reactstrap components
 import {
   Card,
-  CardHeader,
   CardBody,
   Row,
   Col,
-  Form,
-  FormGroup,
-  Label,
   Input,
-  Spinner,
-  ListGroup,
-  ListGroupItem,
   Button,
   CardTitle
 } from "reactstrap";
-import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import { Modal, ModalHeader, ModalBody } from 'reactstrap';
 
 import React, { useState, useEffect, useContext } from 'react';
 import GraphWrapper from "./GraphWrappers/GraphWrapper"
@@ -158,7 +151,7 @@ export default function Typography() {
             })
           }
           {
-            (details && details[1]) && details[1][0]["notes"].map((notesItem, index) => {
+            (details && details[1][0]) && details[1][0]["notes"].map((notesItem, index) => {
               return (
                 <Row>
                   <Col xs={6}>Details:</Col>

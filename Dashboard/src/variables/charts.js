@@ -473,17 +473,35 @@ let pieExample = {
     }
   },
   options: {
-            // title:{
-            //   display:true,
-            //   text:'Average Rainfall per month',
-            //   fontSize:20
-            // },
             legend:{
               display:true,
               position:'right'
             }
           }
 }
+
+let pieTopCalls = {
+      labels: [9876543110, 9874563210],
+      datasets: [
+        {
+          label: "Most frequently called",
+          fill: true,
+          borderColor: "#00d6b4",
+          borderWidth: 2,
+          borderDash: [],
+          borderDashOffset: 0.0,
+          pointBackgroundColor: "#00d6b4",
+          pointBorderColor: "rgba(255,255,255,0)",
+          pointHoverBackgroundColor: "#00d6b4",
+          pointBorderWidth: 20,
+          pointHoverRadius: 4,
+          pointHoverBorderWidth: 15,
+          pointRadius: 4,
+          data: [2,2]
+        }
+      ]
+}
+
 
 module.exports = {
   chartExample1, // in src/views/Dashboard.js
@@ -492,4 +510,5 @@ module.exports = {
   chartExample4, // in src/views/Dashboard.js,
   graphDataFormat, // in src/views/Dashboard.js
   pieExample, // in src/views/Dashboard.js
+  pieTopCalls, // in src/views/Profile.js
 };

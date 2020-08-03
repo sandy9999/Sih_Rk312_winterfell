@@ -54,6 +54,10 @@ cdrRouter.get('/getStatistics',
 cdrRouter.post('/getHeatmapLocations',
     cdrController.getHeatmapLocations
 )
+// Getting the number of calls for a single user for each month
+cdrRouter.post('/getSinglePhoneStatistics',
+    cdrController.getSinglePhoneStatistics
+)
 
 // // Getting the details for a particular record
 // cdrRouter.get('/getOrder', 
