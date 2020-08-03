@@ -245,6 +245,29 @@ const Map = (props) => {
 
   const toggle = () => setDropdownOpen((prevState) => !prevState);
 
+  let processedMessage = JSON.parse(JSON.stringify(selectedUser))
+  if(processedMessage){
+    let newMessage = ""
+    for(let field in processedMessage){
+      if(field == "destLatLong" || field == "originLatLong"){
+        newMessage += field
+        newMessage += "\n"
+        for(let field2 in processedMessage[field]){
+          newMessage += field2
+          newMessage += " : "
+          newMessage += processedMessage[field][field2]
+          newMessage += "\n"  
+        }
+      }else{
+        newMessage += field
+        newMessage += " : "
+        newMessage += processedMessage[field]
+        newMessage += "\n"  
+      }
+    }
+    processedMessage = newMessage
+  } 
+
   return (
     <>
       <div className="content" style={{ height: "80vh" }}>
@@ -331,7 +354,9 @@ const Map = (props) => {
                         }}
                       >
                         <pre style={{ color: "black" }}>
-                          {JSON.stringify(selectedUser, null, 2)}
+                          {
+                            processedMessage
+                          }
                         </pre>
                         <Button
                           variant="contained"
