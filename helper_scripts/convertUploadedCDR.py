@@ -67,13 +67,13 @@ def parse_xls(workbook_name, cdrFile):
                 elif fieldsDictionary[header_row_cleaned[curr_cell]] == "callType":
                     cleaned_val = re.sub('[\W_]+', '',row[curr_cell].value ).lower()
                     if cleaned_val == "incoming" or cleaned_val == "in" or cleaned_val == "ic" or cleaned_val=="callin":
-                        jsonRow.update({"callType": "in"})
+                        jsonRow.update({"callType": "CALL-IN"})
                     elif cleaned_val == "outgoing" or cleaned_val == "out" or cleaned_val == "oc" or cleaned_val=="callout":
-                        jsonRow.update({"callType": "out"})
+                        jsonRow.update({"callType": "CALL-OUT"})
                     if cleaned_val == "smsincoming" or cleaned_val == "smsin" or cleaned_val == "isms" or cleaned_val=="smt":
-                        jsonRow.update({"callType": "smsin"})
+                        jsonRow.update({"callType": "SMS-IN"})
                     if cleaned_val == "smsoutgoing" or cleaned_val == "smsout" or cleaned_val == "osms" or cleaned_val == "smo":
-                        jsonRow.update({"callType": "smsout"})
+                        jsonRow.update({"callType": "SMS-OUT"})
                 elif fieldsDictionary[header_row_cleaned[curr_cell]] == "date":
                     py_date = xlrd.xldate.xldate_as_datetime(row[curr_cell].value, workbook.datemode)
                     jsonRow.update({"date": py_date})
@@ -129,13 +129,13 @@ def parse_csv(file_name, cdrFile):
                 elif fieldsDictionary[header_row_cleaned[curr_cell]] == "callType":
                     cleaned_val = re.sub('[\W_]+', '',row[curr_cell] ).lower()
                     if cleaned_val == "incoming" or cleaned_val == "in" or cleaned_val == "ic" or cleaned_val=="callin":
-                        jsonRow.update({"callType": "in"})
+                        jsonRow.update({"callType": "CALL-IN"})
                     elif cleaned_val == "outgoing" or cleaned_val == "out" or cleaned_val == "oc" or cleaned_val=="callout":
-                        jsonRow.update({"callType": "out"})
+                        jsonRow.update({"callType": "CALL-OUT"})
                     elif cleaned_val == "smsincoming" or cleaned_val == "smsin" or cleaned_val == "isms" or cleaned_val=="smt":
-                        jsonRow.update({"callType": "smsin"})
+                        jsonRow.update({"callType": "SMS-IN"})
                     elif cleaned_val == "smsoutgoing" or cleaned_val == "smsout" or cleaned_val == "osms" or cleaned_val == "smo":
-                        jsonRow.update({"callType": "smsout"})
+                        jsonRow.update({"callType": "SMS-OUT"})
                 elif fieldsDictionary[header_row_cleaned[curr_cell]] == "date":
                     date_list = row[curr_cell].split('-')
                     date_list = [int(x) for x in date_list]
