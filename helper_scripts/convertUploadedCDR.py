@@ -3,7 +3,7 @@ import re
 from datetime import *
 import csv
 
-fieldsDictionary = {'callernumber': 'callernumber', 'callingnumber':'callerNumber', 'mobilenumber': 'callerNumber', 'callingno': 'callerNumber', 'othernumber': 'calledNumber', 'callednumber': 'calledNumber', 'calledno': 'calledNumber', 'calltype': 'callType', 'date': 'date', 'time': 'time', 'duration': 'callDuration', 'dursec': 'callDuration', 'durs': 'callDuration', "imei": "imei", "esn": "imei", "imsi": "imsi", "imsino": "imsi", "calldatetime": "time" }
+fieldsDictionary = {'callernumber': 'callerNumber', 'callingnumber':'callerNumber', 'mobilenumber': 'callerNumber', 'callingno': 'callerNumber', 'othernumber': 'calledNumber', 'callednumber': 'calledNumber', 'calledno': 'calledNumber', 'calltype': 'callType', 'date': 'date', 'time': 'time', 'callduration': 'callDuration', 'duration': 'callDuration', 'dursec': 'callDuration', 'durs': 'callDuration', "imei": "imei", "esn": "imei", "imsi": "imsi", "imsino": "imsi", "calldatetime": "time" }
 
 def get_excel_header_row(workbook, worksheet, num_rows, num_cells):
     curr_row = -1
@@ -41,6 +41,9 @@ def parse_xls(workbook_name, cdrFile):
     num_cells = worksheet.ncols - 1
 
     header_row, header_row_index = get_excel_header_row(workbook, worksheet, num_rows, num_cells)    
+    header_row_processed = [worksheet.cell_value(header_row_index, i) for i in range(0, num_cells)]
+    header_row_cleaned = [re.sub('[\W_]+', '', x).lower() for x in header_row_processed]
+    print(header_row_cleaned)
     curr_row = header_row_index
     while curr_row < num_rows:
         curr_row += 1
@@ -53,10 +56,7 @@ def parse_xls(workbook_name, cdrFile):
                 break
         if emptyRowPresent == True:
             break
-        jsonRow = {}
-        header_row_processed = [worksheet.cell_value(header_row_index, i) for i in range(0, num_cells)]
-        header_row_cleaned = [re.sub('[\W_]+', '', x).lower() for x in header_row_processed]
-        print(header_row_cleaned)
+        jsonRow = {}    
         for curr_cell in range(num_cells):
             if header_row_cleaned[curr_cell] in fieldsDictionary.keys():
                 if fieldsDictionary[header_row_cleaned[curr_cell]] == "callerNumber" or fieldsDictionary[header_row_cleaned[curr_cell]] == "calledNumber":
@@ -66,9 +66,9 @@ def parse_xls(workbook_name, cdrFile):
                         break
                 elif fieldsDictionary[header_row_cleaned[curr_cell]] == "callType":
                     cleaned_val = re.sub('[\W_]+', '',row[curr_cell].value ).lower()
-                    if cleaned_val == "incoming" or cleaned_val == "in" or cleaned_val == "ic":
+                    if cleaned_val == "incoming" or cleaned_val == "in" or cleaned_val == "ic" or cleaned_val=="callin":
                         jsonRow.update({"callType": "in"})
-                    elif cleaned_val == "outgoing" or cleaned_val == "out" or cleaned_val == "oc":
+                    elif cleaned_val == "outgoing" or cleaned_val == "out" or cleaned_val == "oc" or cleaned_val=="callout":
                         jsonRow.update({"callType": "out"})
                     if cleaned_val == "smsincoming" or cleaned_val == "smsin" or cleaned_val == "isms" or cleaned_val=="smt":
                         jsonRow.update({"callType": "smsin"})
@@ -128,9 +128,9 @@ def parse_csv(file_name, cdrFile):
                         break
                 elif fieldsDictionary[header_row_cleaned[curr_cell]] == "callType":
                     cleaned_val = re.sub('[\W_]+', '',row[curr_cell] ).lower()
-                    if cleaned_val == "incoming" or cleaned_val == "in" or cleaned_val == "ic":
+                    if cleaned_val == "incoming" or cleaned_val == "in" or cleaned_val == "ic" or cleaned_val=="callin":
                         jsonRow.update({"callType": "in"})
-                    elif cleaned_val == "outgoing" or cleaned_val == "out" or cleaned_val == "oc":
+                    elif cleaned_val == "outgoing" or cleaned_val == "out" or cleaned_val == "oc" or cleaned_val=="callout":
                         jsonRow.update({"callType": "out"})
                     elif cleaned_val == "smsincoming" or cleaned_val == "smsin" or cleaned_val == "isms" or cleaned_val=="smt":
                         jsonRow.update({"callType": "smsin"})
@@ -162,9 +162,10 @@ def parse_csv(file_name, cdrFile):
         curr_row += 1
         
 
-cdrFile = open('cdrDataTemp.csv','a+',newline='')
+cdrFile = open('cdrDataTemp.csv','w',newline='')
 cdrFieldnames = ['callerNumber', 'calledNumber', 'startTime', 'callDuration', 'endTime', 'callType', 'imei', 'imsi']
 cdrWriter = csv.DictWriter(cdrFile, fieldnames = cdrFieldnames)
 cdrWriter.writeheader()
+parse_csv('cdrData.csv', cdrFile)
 #parse_csv('919197861937.csv', cdrFile)
-parse_xls('9995448186.xls', cdrFile)
+#parse_xls('9995448186.xls', cdrFile)
