@@ -15,6 +15,8 @@ const fs = require('fs')
 const {CDR} = require("./models/callDetails")
 const {IPDR} = require("./models/ipDetails")
 const {Profile} = require("./models/profileDetails.js")
+const portMapping = require('./port-mapping.js')
+const { port } = require("./utils/env")
 
 // Connecting to the database
 mongoose.connect(`mongodb://localhost:27017/${env.db_name}`, {useNewUrlParser: true});
@@ -121,6 +123,11 @@ app.post('/ipdr/uploadIPDRCSV', function(req, res) {
         row.startTime = startTime
         let endTime = new Date(row.endTime)
         row.endTime = endTime
+        if(portMapping.PORT_MAPPING[row.privatePort])
+            row.application = portMapping.PORT_MAPPING[row.privatePort]
+        else
+            row.application = "Unknown"
+        console.log(row)
         
         data = row
         IPDR.findOneAndUpdate(data, data, {upsert: true}, function() {
