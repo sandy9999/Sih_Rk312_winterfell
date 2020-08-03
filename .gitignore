@@ -5,8 +5,7 @@ client/node_modules/*
 client/package-lock.json
 helper_scripts/trial.py
 helper_scripts/404.csv
-client/.env*
-Dashboard/.env*
-Dashboard/node_modules
-Dashboard/package-lock.json
-Dashboard/node_modules/*
+client/.env.local
+client/node_modules
+client/package-lock.json
+client/node_modules/*
