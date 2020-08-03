@@ -23,8 +23,14 @@ profileRouter.post('/getSearchResults',
 	profileController.getSearchResults
 )
 
+// Getting all the details needed for the dashboard
 profileRouter.post('/getUserDetails',
 	profileController.getUserDetails
+)
+
+// Update a user's data
+profileRouter.post('/updateUser',
+	profileController.updateUserDetails
 )
 
 module.exports = {
