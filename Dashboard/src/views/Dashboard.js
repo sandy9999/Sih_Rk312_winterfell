@@ -370,13 +370,13 @@ class Dashboard extends React.Component {
           </Row>
           <Row>
             <Col lg="6" md="12">
-              <Card className="card-tasks">
+              <Card className="card-tasks" style={{maxHeight:"500px", overflow:"auto"}}>
                 <CardHeader>
                   <h6 className="title d-inline">Notes({numNotes})</h6>
                   <p className="card-category d-inline"> Latest</p>
                 </CardHeader>
                 <CardBody>
-                  <div className="table-full-width table-responsive">
+                  <div className="table-full-width">
                     <Table>
                       <tbody>
                         {noteComponents}
@@ -387,12 +387,12 @@ class Dashboard extends React.Component {
               </Card>
             </Col>
             <Col lg="6" md="12">
-              <Card>
-                <CardHeader style={{overflowY : "hidden", height : "10px"}}>
+              <Card style={{maxHeight:"500px", overflow:"auto"}}>
+                <CardHeader >
                   <CardTitle tag="h4">CDR Data</CardTitle>
                 </CardHeader>
                 <CardBody>
-                  <Table className="tablesorter" responsive>
+                  <Table className="tablesorter" >
                     <thead className="text-primary">
                       <tr>
                         <th>Source Number</th>

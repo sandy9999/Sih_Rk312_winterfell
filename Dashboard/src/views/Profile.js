@@ -79,8 +79,9 @@ class Profile extends React.Component {
       email: "",
       aadharNumber: "",
       remarks: "",
-      topCallLabels: ["hi", "bye"],
-      topCallFreqs: [2,3]
+      topCallLabels: [],
+      topCallFreqs: [],
+      totalCalls: 0
     
     };
     // Getting all the profile details for the number
@@ -132,9 +133,11 @@ class Profile extends React.Component {
         // get pie chart labels, values for most frequent calls
         let topCallFreqs = [];
         let topCallLabels = [];
+        let totalCalls = 0;
         for(let caller of data.topCallers){
           topCallLabels.push(caller.caller)
           topCallFreqs.push(caller.numCalls)
+          totalCalls += caller.numCalls;
         }
 
         this.setState({
@@ -150,7 +153,8 @@ class Profile extends React.Component {
           cdrRecords : cdrData,
           ipdrRecords: ipdrData,
           topCallLabels: topCallLabels,
-          topCallFreqs: topCallFreqs
+          topCallFreqs: topCallFreqs,
+          totalCalls: totalCalls
         })
       })
       .catch((err) => console.log(err))
@@ -471,10 +475,10 @@ class Profile extends React.Component {
             <Col lg="4">
               <Card className="card-chart">
                 <CardHeader>
-                  <h5 className="card-category">Total Shipments</h5>
+                  <h5 className="card-category">Top 5 callers</h5>
                   <CardTitle tag="h3">
-                    <i className="tim-icons icon-bell-55 text-info" />{" "}
-                    763,215
+                    <i className="tim-icons icon-chat-33 text-info" />{" "}
+                    {this.state.totalCalls} calls 
                   </CardTitle>
                 </CardHeader>
                 <CardBody>
@@ -490,16 +494,29 @@ class Profile extends React.Component {
             <Col lg="4">
               <Card className="card-chart">
                 <CardHeader>
-                  <h5 className="card-category">Daily Sales</h5>
+                  <h5 className="card-category">Top App usage</h5>
                   <CardTitle tag="h3">
-                    <i className="tim-icons icon-delivery-fast text-primary" />{" "}
-                    3,500€
+                    <i className="tim-icons icon-app text-primary" />{" "}
+                    500 mins
                   </CardTitle>
                 </CardHeader>
                 <CardBody>
                   <div className="chart-area">
                     <Bar
-                      data={chartExample3.data}
+                      data={{
+                        labels: ["Whatsapp", "Facebook", "Telegram", "Discord", "Browser"],
+                        datasets: [
+                          {
+                            label: "Duration",
+                            fill: true,
+                            borderColor: "#d048b6",
+                            borderWidth: 2,
+                            borderDash: [],
+                            borderDashOffset: 0.0,
+                            data: [90, 120, 110, 80, 100]
+                          }
+                        ]
+                    }}
                       options={chartExample3.options}
                     />
                   </div>
@@ -507,13 +524,13 @@ class Profile extends React.Component {
               </Card>
             </Col>
             <Col lg="4">
-            <Card className="card-tasks">
+            <Card className="card-tasks" style={{maxHeight: "330px", overflow: "auto"}}>
                 <CardHeader>
                   <h6 className="title d-inline">Notes({numNotes})</h6>
                   <p className="card-category d-inline"> Latest </p>
                   </CardHeader>
                 <CardBody>
-                  <div className="table-full-width table-responsive">
+                  <div className="table-full-width">
                     <Table>
                       <tbody>
                         {noteComponents}
@@ -526,12 +543,12 @@ class Profile extends React.Component {
           </Row>
           <Row>
             <Col lg="6" md="12">
-            <Card>
+            <Card style={{maxHeight:"500px", overflow:"auto"}}>
                 <CardHeader>
                   <CardTitle tag="h4">IPDR Data</CardTitle>
                 </CardHeader>
                 <CardBody>
-                  <Table className="tablesorter" responsive>
+                  <Table className="tablesorter">
                     <thead className="text-primary">
                       <tr>
                         <th>Source IP</th>
@@ -549,12 +566,12 @@ class Profile extends React.Component {
               </Card>
             </Col>
             <Col lg="6" md="12">
-              <Card>
+              <Card style={{maxHeight:"500px", overflow:"auto"}}>
                 <CardHeader>
                   <CardTitle tag="h4">CDR Data</CardTitle>
                 </CardHeader>
                 <CardBody>
-                  <Table className="tablesorter" responsive>
+                  <Table className="tablesorter">
                     <thead className="text-primary">
                       <tr>
                         <th>Source Number</th>

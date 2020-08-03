@@ -45,11 +45,11 @@ import {
 import { store } from "../store";
 
 import userPin0 from "assets/img/userPin0.png";
-import userPin1 from "assets/img/userPin0.png";
-import userPin2 from "assets/img/userPin0.png";
-import userPin3 from "assets/img/userPin0.png";
-import userPin4 from "assets/img/userPin0.png";
-import userPin5 from "assets/img/userPin0.png";
+import userPin1 from "assets/img/userPin1.png";
+import userPin2 from "assets/img/userPin2.png";
+import userPin3 from "assets/img/userPin3.png";
+import userPin4 from "assets/img/userPin4.png";
+import userPin5 from "assets/img/userPin5.png";
 import { setGlobalCssModule } from "reactstrap/lib/utils";
 
 const userPinArray = [
@@ -352,6 +352,7 @@ const Map = (props) => {
                     {/* HeatMap markers */}
                     {Object.keys(heatMapMarkers).length &&
                       Object.keys(heatMapMarkers).map((ele, idx) => {
+                        console.log("jeyyyy", userPinArray[idx]);
                         return (
                           <>
                             {heatMapMarkers[ele].map((item, index) => {
@@ -381,6 +382,7 @@ const Map = (props) => {
                                       src={userPinArray[idx]}
                                       height="40px"
                                       width="40px"
+                                      style={{opacity:0.5}}
                                     />
                                   </button>
                                 </Marker>
@@ -599,7 +601,7 @@ const Map = (props) => {
                   >
                     <Form>
                       <FormGroup>
-                        <Label>Target List - max 10</Label>
+                        <Label>Target List - max 5</Label>
                         <Input
                           style={{ color: "white" }}
                           type="number"
