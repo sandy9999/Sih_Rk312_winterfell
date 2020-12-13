@@ -40,7 +40,7 @@ const ipDataRecords = Schema({
     downlinkVolume : {type : Number, required : true},
 
     // Total Volume
-    totalVolume : {type : Number, required : true},
+    totalVolume : {type : Number},
 
     //Cell ID where connection was initiated
     originCellID: {type: String, required: true, index: true},
@@ -65,6 +65,7 @@ const ipDataRecords = Schema({
         type : String, 
         enum : ['2G', '3G', '4G']
     },
+    application: {type: String}
 });
 
 module.exports = {

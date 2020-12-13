@@ -3,6 +3,7 @@ const {IPDR} = require("./../models/ipDetails")
 //const {Notes} = require("./../models/noteDetails")
 const {calculateDistance} = require("./../utils/utils")
 const nodeGeocoder = require('node-geocoder')
+const portMapping = require('../port-mapping.js')
 
 // Return all the CDR Records
 let getAllIPDRRecords = async (req, res) => {
@@ -51,7 +52,7 @@ let validateIPDRRecord = async(req, res, next) => {
         }
 
         // Validating all required fields
-        let required_fields = ["privateIP", "privatePort", "publicIP", "publicPort", "destIP", "destPort", "phoneNumber", "startTime", "endTime", "uplinkVolume", "downlinkVolume", "totalVolume", "imei", "imsi", "originLatLong", "accessType"]
+        let required_fields = ["privateIP", "privatePort", "publicIP", "publicPort", "destIP", "destPort", "phoneNumber", "startTime", "endTime", "uplinkVolume", "downlinkVolume", "imei", "imsi", "originLatLong"]
     
         // Checking whether fields exist
         for(let req_field of required_fields){
@@ -68,7 +69,7 @@ let validateIPDRRecord = async(req, res, next) => {
         return next() 
     }catch(err){
         res.json({
-            message : "Error trying to validate cdr record",
+            message : "Error trying to validate ipdr record",
             error : err, 
             code : 500
         })
@@ -102,6 +103,10 @@ let addIPDRRecord = async(req, res) => {
     IPRecord.startTime = startTime
     let endTime = new Date(IPRecord.endTime)
     IPRecord.endTime = endTime
+    if(portMapping.PORT_MAPPING[IPRecord.privatePort])
+            IPRecord.application = portMapping.PORT_MAPPING[IPRecord.privatePort]
+    else
+            IPRecord.application = "Unknown"
     IPDR.findOneAndUpdate(IPRecord, IPRecord, {upsert: true}, function() {
 
     })
